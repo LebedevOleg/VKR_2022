@@ -1,0 +1,24 @@
+{
+  "name": "vkr_2022_lebedev_server",
+  "version": "1.0.0",
+  "description": "this server work on postgreSQL",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon server.js"
+  },
+  "keywords": [
+    "server",
+    "node",
+    "postgreSQL",
+    "js"
+  ],
+  "author": "lebedevoleg72@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "config": "^3.3.7",
+    "express": "^4.17.3",
+    "nodemon": "^2.0.15",
+    "pg": "^8.7.3"
+  }
+}
