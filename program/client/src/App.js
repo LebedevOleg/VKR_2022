@@ -1,0 +1,29 @@
+import { useRoutes } from "./routes";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { useAuth } from "./hooks/auth.hook";
+import { AuthContext } from "./context/authContext";
+import { Loader } from "./components/Loader/loader";
+import NavBar from "./components/menu/menu";
+import ShopPage from "./pages/shopPage/shopPage";
+
+function App() {
+  const { token, login, logout, userId, ready } = useAuth();
+  const isAuthent = !!token;
+  const routes = useRoutes(isAuthent);
+
+  if (!ready) {
+    return <Loader />;
+  }
+
+  return (
+    <AuthContext.Provider value={{ token, userId, login, logout, isAuthent }}>
+      <NavBar />
+      <Router>
+        <Routes>
+          <Route path="/shop" element={<ShopPage />} />
+        </Routes>
+      </Router>
+    </AuthContext.Provider>
+  );
+}
+export default App;

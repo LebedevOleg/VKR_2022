@@ -3,6 +3,7 @@ const config = require("config");
 const db = require("../db");
 const jwt = require("jsonwebtoken");
 const { check, validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
 
 const router = new Router();
 
@@ -13,6 +14,45 @@ router.post("/", async (req, res) => {
     res.status(400).json({ message: e.message });
   }
 });
+
+// */api/sign
+router.get("/", async (req, res) => {
+  try {
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+// */api/sign/login
+router.post(
+  "/login",
+  [check("password", "Пароль не может быть пустым").exists()],
+  async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const user = await db.query('SELECT * FROM users WHERE "uEmail" = $1', [
+        email,
+      ]);
+      if (user.rowCount == 0) {
+        return res
+          .status(400)
+          .json({ message: "Пользователя с такой почтой не существует!!" });
+      }
+      const isMatch = await bcrypt.compare(password, user.rows[0].uPassword);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Пароль не верный!" });
+      }
+      const token = jwt.sign(
+        { userId: user.rows[0].id },
+        config.get("jwtSecret"),
+        { expiresIn: "10d" }
+      );
+      return res.status(201).json({ token, userId: user.rows[0].id });
+    } catch (e) {
+      res.status(400).json({ message: e.message });
+    }
+  }
+);
 
 // */api/sign/registr
 router.post(
@@ -28,30 +68,36 @@ router.post(
 
       const { password, email, firstName, lastName, phone } = req.body;
 
+      const users = await db.query(
+        'SELECT "uEmail" from users WHERE "uEmail" = $1',
+        [email]
+      );
+      console.log(users.rowCount);
+      if (users.rowCount != 0) {
+        return res
+          .status(400)
+          .json({ message: "Пользователь с такой почтой уже существует" });
+      }
+      const hashedPassword = await bcrypt.hash(password, 12);
+      console.log(firstName, lastName, email, hashedPassword);
+      const newUser = await db.query(
+        'INSERT INTO public.users("uName", "uLastName", "uEmail", "uPassword")VALUES ($1,$2,$3,$4) RETURNING id',
+        [firstName, lastName, email, hashedPassword]
+      );
       const token = jwt.sign(
-        { userId: newPerson.rows[0].id },
+        { userId: newUser.rows[0].id },
         config.get("jwtSecret"),
         { expiresIn: "10d" }
       );
-      return res
-        .status(201)
-        .json({
-          token,
-          uId: newPerson.rows[0].id,
-          uRole: newPerson.rows[0].uRole,
-        });
+      return res.status(201).json({
+        token,
+        userId: newUser.rows[0].id,
+      });
     } catch (e) {
+      console.log(e);
       res.status(400).json({ message: e.message });
     }
   }
 );
-
-// */api/sign
-router.get("/", auth, async (req, res) => {
-  try {
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
-});
 
 module.exports = router;

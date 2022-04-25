@@ -14,13 +14,42 @@ import { Box } from "@mui/system";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import axios from "axios";
+import { AuthContext } from "../../context/authContext";
 
 const SignModal = () => {
   const [openSign, setOpenSign] = useState(false);
   const [tabValue, setTabValue] = useState("0");
-  const [email, setEmail] = useState("");
+  const auth = useContext(AuthContext);
+  const [formLogin, setFormLogin] = useState({ email: "", password: "" });
+  const [formReg, setFormReg] = useState({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+  });
 
+  const loginFunc = async () => {
+    try {
+      await axios.post("/api/sign/login", { ...formLogin }).then((res) => {
+        console.log(res.data);
+        auth.login(res.data.token, res.data.userId);
+      });
+      window.location = "/account";
+    } catch (e) {}
+  };
+
+  const regFunc = async () => {
+    try {
+      const registrData = await axios.post("/api/sign/registr", { ...formReg });
+      auth.login(registrData.data.token, registrData.data.userId);
+      window.location = "/accountReg";
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  //#region Handles
   const handleClickOpen = () => {
     setOpenSign(true);
   };
@@ -30,8 +59,13 @@ const SignModal = () => {
   const handleChangeTabs = (event, newValue) => {
     setTabValue(newValue);
   };
-  const handleChangeEmail = (event) => {};
-
+  const handleChangeFormLogin = (event) => {
+    setFormLogin({ ...formLogin, [event.target.name]: event.target.value });
+  };
+  const handleChangeFormReg = (event) => {
+    setFormReg({ ...formReg, [event.target.name]: event.target.value });
+  };
+  //#endregion
   return (
     <div>
       <Button color="inherit" onClick={handleClickOpen}>
@@ -54,8 +88,7 @@ const SignModal = () => {
             <TabPanel value="0">
               <DialogContent>
                 <DialogContentText>
-                  Введите данные для входа или нажмите кнопку
-                  зарегестрироваться.
+                  Введите данные для входа или перейдите на вкладку регистрации.
                 </DialogContentText>
                 <Box sx={{ display: "flex", alignItems: "flex-end" }}>
                   <AccountCircle
@@ -64,12 +97,14 @@ const SignModal = () => {
                   />
                   <TextField
                     autoFocus
+                    name="email"
                     margin="dense"
                     id="email"
                     label="Введите почту"
                     type="email"
                     fullWidth
                     variant="filled"
+                    onChange={handleChangeFormLogin}
                   />
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "flex-end" }}>
@@ -78,24 +113,27 @@ const SignModal = () => {
                     fontSize="large"
                   />
                   <TextField
+                    name="password"
                     margin="dense"
                     id="password"
                     label="Введите пароль"
                     type="password"
                     fullWidth
                     variant="filled"
+                    onChange={handleChangeFormLogin}
                   />
                 </Box>
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleClickClose}>Отмена</Button>
-                <Button>Войти</Button>
+                <Button onClick={loginFunc}>Войти</Button>
               </DialogActions>
             </TabPanel>
             <TabPanel value="1">
               <DialogContent>
                 <DialogContentText>
-                  Введите данные для регестрировации.
+                  Введите данные для регестрировации или перейдите на вкладку
+                  входа.
                 </DialogContentText>
                 <Box sx={{ display: "flex", alignItems: "flex-end" }}>
                   <AccountCircle
@@ -110,6 +148,8 @@ const SignModal = () => {
                     type="text"
                     fullWidth
                     variant="filled"
+                    name="firstName"
+                    onChange={handleChangeFormReg}
                   />
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "flex-end" }}>
@@ -124,6 +164,8 @@ const SignModal = () => {
                     type="text"
                     fullWidth
                     variant="filled"
+                    name="lastName"
+                    onChange={handleChangeFormReg}
                   />
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "flex-end" }}>
@@ -138,6 +180,8 @@ const SignModal = () => {
                     type="email"
                     fullWidth
                     variant="filled"
+                    name="email"
+                    onChange={handleChangeFormReg}
                   />
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "flex-end" }}>
@@ -152,12 +196,14 @@ const SignModal = () => {
                     type="password"
                     fullWidth
                     variant="filled"
+                    name="password"
+                    onChange={handleChangeFormReg}
                   />
                 </Box>
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleClickClose}>Отмена</Button>
-                <Button>зарегистрироваться</Button>
+                <Button onClick={regFunc}>зарегистрироваться</Button>
               </DialogActions>
             </TabPanel>
           </TabContext>
