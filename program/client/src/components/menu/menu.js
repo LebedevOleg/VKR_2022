@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -15,13 +15,15 @@ import { Button } from "@mui/material";
 import SignModal from "../SignModal/sign.modal";
 import { useAuth } from "../../hooks/auth.hook";
 import { AuthContext } from "../../context/authContext";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import axios from "axios";
 
 const NavBar = () => {
-  const [anchorEl, setAnchorEl] = useState(null);
   const { token } = useAuth();
   const [openProf, setOpenProf] = useState(null);
   const open = Boolean(openProf);
   const auth = useContext(AuthContext);
+  const [uRole, setURole] = useState(null);
   const handleClick = (event) => {
     setOpenProf(event.currentTarget);
   };
@@ -32,21 +34,53 @@ const NavBar = () => {
         setOpenProf(null);
         window.location = "/main";
         break;
+      case "service":
+        window.location = "/service";
+        break;
+      case "accaunt":
+        window.location = "/profile";
+        break;
       default:
         setOpenProf(null);
         break;
     }
   };
+  const handleGetRole = useCallback(async () => {
+    await axios
+      .get("/api/user/getRole", {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      })
+      .then(async (res) => {
+        setURole(res.data.uRole);
+      });
+  }, []);
+
+  useEffect(() => {
+    handleGetRole();
+  }, [handleGetRole]);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            <Button sx={{ my: 2, color: "white", display: "block" }}>
-              {" "}
+            <Button
+              sx={{ my: 2, color: "white", display: "block" }}
+              onClick={() => {
+                window.location = "/shop";
+              }}
+            >
               Оборудование
             </Button>
           </Typography>
+          <IconButton
+            aria-label="shopping cart"
+            onClick={() => {
+              window.location = "/shoplist";
+            }}
+          >
+            <ShoppingCartIcon />
+          </IconButton>
           {(!!token && (
             <Typography>
               <Button
@@ -71,6 +105,12 @@ const NavBar = () => {
                 <MenuItem id="accaunt" onClick={handleClose}>
                   Мой аккаунт
                 </MenuItem>
+                {uRole !== 3 && (
+                  <MenuItem id="service" onClick={handleClose}>
+                    Сервисное меню
+                  </MenuItem>
+                )}
+
                 <MenuItem id="logout" onClick={handleClose}>
                   Выйти
                 </MenuItem>
