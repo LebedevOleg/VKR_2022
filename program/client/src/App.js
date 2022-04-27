@@ -16,7 +16,6 @@ function App() {
   if (!ready) {
     return (
       <>
-        <NavBar />
         <Loader />
       </>
     );

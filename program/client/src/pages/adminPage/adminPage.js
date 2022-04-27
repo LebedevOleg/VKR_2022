@@ -19,7 +19,7 @@ const AdminPage = () => {
             Тестовое место для карты
             <YMaps>
               <Map
-                defaultState={{ center: [55.751574, 37.573856], zoom: 9 }}
+                defaultState={{ center: [55.69055, 37.58298], zoom: 12 }}
               ></Map>
             </YMaps>
           </Box>

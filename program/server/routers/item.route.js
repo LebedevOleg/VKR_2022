@@ -16,6 +16,20 @@ router.post("/", async (req, res) => {
   }
 });
 
+// */api/item/getItem
+router.post("/getItem", async (req, res) => {
+  try {
+    const { id } = req.body;
+    const item = await db.query('SELECT * FROM equipment WHERE "id"=$1', [id]);
+    if (item.rowCount === 0) {
+      return res.status(201).json({ message: "Ошибка в получении данных" });
+    }
+    res.status(201).json({ item: item.rows[0] });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
 // */api/item/getItems
 router.get("/getItems", async (req, res) => {
   try {

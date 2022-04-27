@@ -26,7 +26,7 @@ const ShopPage = () => {
     handleGetItems();
   }, [handleGetItems]);
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1, flexWrap: "wrap" }}>
       <Grid container spacing={1}>
         <Grid item xs={3}>
           <Box
