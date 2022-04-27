@@ -6,6 +6,7 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -33,6 +34,17 @@ const ItemPage = () => {
   useEffect(() => {
     handleGetItem();
   }, [handleGetItem]);
+
+  if (item === null) {
+    return (
+      <Skeleton
+        variant="rectangular"
+        sx={{ m: 2 }}
+        width={"99%"}
+        height={250}
+      />
+    );
+  }
   return (
     <Box>
       <Card sx={{ display: "flex" }}>
