@@ -24,6 +24,7 @@ import React, {
 import { AuthContext } from "../../context/authContext";
 import { IMaskInput } from "react-imask";
 import PropTypes from "prop-types";
+import { toast, Toaster } from "react-hot-toast";
 
 const PhoneNumCustom = forwardRef(function PhoneNumCustom(props, ref) {
   const { onChange, ...other } = props;
@@ -51,7 +52,15 @@ const AccauntPage = () => {
     uPhone: "",
     uEmail: null,
   });
+  const [uPass, setUPass] = useState({
+    oldPass: null,
+    newPass1: null,
+    newPass2: null,
+  });
 
+  const handleChangePass = (event) => {
+    setUPass({ ...uPass, [event.target.name]: event.target.value });
+  };
   const handleChangeTabs = (event, newValue) => {
     setTab(newValue);
   };
@@ -81,11 +90,33 @@ const AccauntPage = () => {
       }
     );
   };
+  const handleSaveNewPass = async () => {
+    if (uPass.newPass1 !== uPass.newPass2) {
+      return toast.error("Новые пароли не совпадают!!", {
+        position: "bottom-left",
+      });
+    }
+    await axios
+      .post(
+        "/api/user/changeUserPassword",
+        {
+          oldPass: uPass.oldPass,
+          newPass: uPass.newPass1,
+        },
+        { headers: { Authorization: `Bearer ${auth.token}` } }
+      )
+      .then((res) => {
+        toast.success("Пароль успешно изменен", { position: "bottom-left" });
+      });
+  };
   useEffect(() => {
     handleGetUserInfo();
   }, [handleGetUserInfo]);
   return (
     <>
+      <div>
+        <Toaster />
+      </div>
       <Typography>Страница пользователя</Typography>
       <Box sx={{ width: "100%", typography: "body1" }}>
         <TabContext value={tab}>
@@ -182,10 +213,11 @@ const AccauntPage = () => {
                   <TextField
                     sx={{ ml: 1, width: "300px" }}
                     size="small"
-                    name="uOldPass"
+                    name="oldPass"
                     type="password"
                     variant="standard"
                     placeholder="Введите текузий пароль"
+                    onChange={handleChangePass}
                   />
                 </Typography>
               </Box>
@@ -199,11 +231,12 @@ const AccauntPage = () => {
                       maxWidth: "400px",
                       minWidth: "150px",
                     }}
-                    name="uNewPass"
+                    name="newPass1"
                     size="small"
                     type="password"
                     variant="standard"
                     placeholder="Введите новый пароль"
+                    onChange={handleChangePass}
                   />
                 </Typography>
               </Box>
@@ -217,16 +250,21 @@ const AccauntPage = () => {
                       maxWidth: "400px",
                       minWidth: "150px",
                     }}
-                    name="uNewPassReapeat"
+                    name="newPass2"
                     size="small"
                     type="password"
                     variant="standard"
                     placeholder="Повторите новый пароль"
+                    onChange={handleChangePass}
                   />
                 </Typography>
               </Box>
             </Stack>
-            <Button sx={{ m: 1 }} variant="contained">
+            <Button
+              sx={{ m: 1 }}
+              variant="contained"
+              onClick={handleSaveNewPass}
+            >
               Изменить пароль
             </Button>
           </TabPanel>

@@ -11,6 +11,15 @@ import React from "react";
 
 const ItemCard = (data) => {
   //data.item - туда приходят данные
+  console.log(data.item);
+  const handleSaveItem = () => {
+    const cartArray = [];
+    if (localStorage.getItem("cart")) {
+      cartArray.push(localStorage.getItem("cart"));
+    }
+    cartArray.push(Number(data.item.id));
+    localStorage.setItem("cart", cartArray);
+  };
   return (
     <Card sx={{ maxWidth: 450 }}>
       <CardContent>
@@ -30,7 +39,9 @@ const ItemCard = (data) => {
         >
           Подробнее
         </Button>
-        <Button size="small">В заказ</Button>
+        <Button size="small" onClick={handleSaveItem}>
+          В заказ
+        </Button>
       </CardActions>
     </Card>
   );

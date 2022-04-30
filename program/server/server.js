@@ -4,6 +4,7 @@ const config = require("config");
 const signRouter = require("./routers/sign.route");
 const userRouter = require("./routers/user.route");
 const itemRouter = require("./routers/item.route");
+const cartRouter = require("./routers/cart.route");
 //#endregion
 
 const app = express();
@@ -12,5 +13,6 @@ app.use(express.json({ extended: true }));
 app.use("/api/sign", signRouter);
 app.use("/api/user", userRouter);
 app.use("/api/item", itemRouter);
+app.use("/api/cart", cartRouter);
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

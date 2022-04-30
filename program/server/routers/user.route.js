@@ -58,6 +58,31 @@ router.post("/changeInfoUser", auth, async (req, res) => {
   }
 });
 
+// */api/user/changeUserPassword
+router.post("/changeUserPassword", auth, async (req, res) => {
+  try {
+    const { oldPass, newPass } = req.body;
+    const currPass = await db.query(
+      'SELECT "uPassword" FROM users WHERE "id" = $1',
+      [req.userAuth.userId]
+    );
+    const isMatch = await bcrypt.compare(oldPass, currPass.rows[0].uPassword);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ message: "Текущий пароль введен неверно!" });
+    }
+    const hashedPassword = await bcrypt.hash(newPass, 12);
+    await db.query('UPDATE users SET "uPassword"=$1 WHERE "id" =$2', [
+      hashedPassword,
+      req.userAuth.userId,
+    ]);
+    res.status(201).json({ message: "Пароль успешно изменен!" });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
 // */api/sign
 router.get("/", async (req, res) => {
   try {
