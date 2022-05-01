@@ -1,19 +1,29 @@
-import { Box, Button, Grid, Skeleton, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
 import React, { useCallback, useContext, useEffect, useState } from "react";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 const CartPage = () => {
   const [cart, setCart] = useState(null);
   const GetCartItem = useCallback(async () => {
     const localCart = localStorage.getItem("cart");
-    //localCart.push(localStorage.getItem("cart"));
-    console.log(localCart);
     await axios
       .post("/api/cart/getCartItems", { items: localCart })
       .then((res) => {
         setCart(res.data.items);
       });
   }, []);
+
+  const handleCreateOrder = async () => {};
+
   useEffect(() => {
     GetCartItem();
   }, [GetCartItem]);
@@ -30,20 +40,61 @@ const CartPage = () => {
             </Typography>
             <Stack spacing={1.5}>
               {(cart !== null &&
-                cart.map((item) => (
-                  <Box sx={{ display: "flex", flexDirection: "row" }}>
-                    <Typography variant="body1" component="div">
-                      {item.eName}
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      component="div"
-                      sx={{ display: "flex", ml: "auto" }}
-                    >
-                      {item.ePrice}
-                    </Typography>
-                  </Box>
-                ))) || (
+                cart.map(
+                  (item) =>
+                    (item !== null && (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "row",
+                          borderBottom: 1,
+                          borderBlockColor: "#757575",
+                        }}
+                      >
+                        <Typography variant="body1" component="div">
+                          {item.eName}
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          component="div"
+                          sx={{ display: "flex", ml: "auto" }}
+                        >
+                          {item.ePrice}
+                        </Typography>
+                        <IconButton
+                          aria-label="shopping cart"
+                          sx={{ alignContent: "center" }}
+                          id={item.id}
+                          onClick={async () => {
+                            let tempArray = [];
+
+                            tempArray = localStorage.getItem("cart").split(",");
+                            let index = tempArray.indexOf(toString(item.id));
+                            tempArray.splice(index, 1);
+
+                            localStorage.setItem("cart", tempArray);
+                            GetCartItem();
+                          }}
+                        >
+                          <DeleteForeverIcon />
+                        </IconButton>
+                      </Box>
+                    )) || (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "row",
+                          borderBottom: 1,
+                          borderBlockColor: "#757575",
+                        }}
+                      >
+                        {" "}
+                        <Typography variant="body1" component="div">
+                          В Корзине нет товара
+                        </Typography>{" "}
+                      </Box>
+                    )
+                )) || (
                 <Skeleton
                   variant="rectangular"
                   sx={{ m: 2 }}
@@ -55,7 +106,7 @@ const CartPage = () => {
           </Box>
         </Grid>
       </Grid>
-      <Button variant="outlined" color="success">
+      <Button variant="outlined" sx={{ mt: 1 }} color="success">
         Забронировать
       </Button>
     </>
