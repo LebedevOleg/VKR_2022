@@ -39,4 +39,58 @@ router.get("/getItems", async (req, res) => {
     res.status(400).json({ message: e.message });
   }
 });
+
+// */api/item/getCategory
+router.post("/getCategory", async (req, res) => {
+  try {
+    const { id } = req.body;
+    const category = await db.query(
+      'SELECT "eCategory" FROM equipment WHERE "id" =$1',
+      [id]
+    );
+    res.status(201).json({ category: category.rows[0].eCategory });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+// */api/item/getOptions
+router.post("/getOptions", async (req, res) => {
+  try {
+    const { id } = req.body;
+    const options = await db.query(
+      'SELECT id, "oName", "oValueIntA", "oValueIntB", "oValueChar", "eId", "oValueName" FROM options WHERE "eId"=$1 ORDER BY id ASC',
+      [id]
+    );
+    if (options.rowCount === 0) {
+      return res.status(201).json({
+        result:
+          "Характеристике объекта еще не внесены, просим прощения за предоставленные неудобства",
+      });
+    }
+    res.status(201).json({ options: options.rows });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+// */api/item/getOptionsSort
+router.post("/getOptionsSort", async (req, res) => {
+  try {
+    const { id } = req.body;
+    const options = await db.query(
+      'SELECT id, "oName", "oValueIntA", "oValueIntB", "oValueChar", "eId", "oValueName" FROM options WHERE "eId"=$1 order by "oName" ASC',
+      [id]
+    );
+    if (options.rowCount === 0) {
+      return res.status(201).json({
+        result:
+          "Характеристике объекта еще не внесены, просим прощения за предоставленные неудобства",
+      });
+    }
+    res.status(201).json({ options: options.rows });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
 module.exports = router;

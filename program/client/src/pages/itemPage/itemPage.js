@@ -19,9 +19,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import Paper from "@mui/material/Paper";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import AddOptions from "./addOptions";
 
 const ItemPage = () => {
   const [item, setItem] = useState(null);
+  const [options, setOptions] = useState(null);
   const params = useParams();
 
   const handleGetItem = useCallback(async () => {
@@ -31,9 +33,17 @@ const ItemPage = () => {
         setItem(res.data.item);
       });
   }, []);
+  const handleGetOptions = useCallback(async () => {
+    await axios
+      .post("/api/item/getOptions", { id: Number(params.id.split(":")[1]) })
+      .then((res) => {
+        setOptions(res.data.options);
+      });
+  }, []);
   useEffect(() => {
     handleGetItem();
-  }, [handleGetItem]);
+    handleGetOptions();
+  }, [handleGetItem, handleGetOptions]);
 
   if (item === null) {
     return (
@@ -75,7 +85,27 @@ const ItemPage = () => {
                     <TableCell>Параметр</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody></TableBody>
+
+                {options !== undefined &&
+                  options !== null &&
+                  options.map((option) => (
+                    <TableBody key={option.id}>
+                      <TableCell>{option.oName}</TableCell>{" "}
+                      <TableCell>
+                        {(option.oValueChar === null &&
+                          ((option.oValueIntB === null &&
+                            option.oValueIntA.toString() +
+                              " " +
+                              option.oValueName) ||
+                            option.oValueIntA.toString() +
+                              " - " +
+                              option.oValueIntB.toString() +
+                              " " +
+                              option.oValueName)) ||
+                          option.oValueChar}
+                      </TableCell>
+                    </TableBody>
+                  ))}
               </Table>
             </TableContainer>
           </Box>
@@ -84,6 +114,10 @@ const ItemPage = () => {
           <Button>В корзину</Button>
         </CardActions>
       </Card>
+      <Box>
+        <Typography>{item.eDescription}</Typography>
+      </Box>
+      <AddOptions />
     </Box>
   );
 };

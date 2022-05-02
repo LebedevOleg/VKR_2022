@@ -40,7 +40,7 @@ const ShopPage = () => {
             Блок для фильтров
           </Box>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={9} sx={{ display: "flex", flexDirection: "row" }}>
           Блок для товаров
           {itemArray.map((item) => (
             <ItemCard item={item} />

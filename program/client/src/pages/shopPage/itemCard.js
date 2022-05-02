@@ -21,7 +21,7 @@ const ItemCard = (data) => {
     localStorage.setItem("cart", cartArray);
   };
   return (
-    <Card sx={{ maxWidth: 450 }}>
+    <Card sx={{ maxWidth: 450, m: 1 }}>
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
           {data.item.eName}
