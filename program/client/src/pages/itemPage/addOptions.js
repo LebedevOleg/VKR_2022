@@ -14,7 +14,7 @@ import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
 
 const AddOptions = () => {
-  const [optionsForm, setOptionsForm] = useState([]);
+  const optionsMap = new Map();
   const [options, setOptions] = useState(null);
   const [category, setCategory] = useState(null);
   const params = useParams();
@@ -38,7 +38,7 @@ const AddOptions = () => {
       .then((res) => {
         setCategory(res.data.category);
       });
-  });
+  }, []);
   const handleGetOptions = useCallback(async () => {
     await axios
       .post("/api/item/getOptionsSort", { id: Number(params.id.split(":")[1]) })
@@ -46,6 +46,43 @@ const AddOptions = () => {
         setOptions(res.data.options);
       });
   }, []);
+
+  const handleChangeOptions = (event) => {
+    let tempStruct;
+    if (optionsMap.has(event.target.name)) {
+      tempStruct = optionsMap.get(event.target.name);
+    } else {
+      tempStruct = {
+        oName: null,
+        oValueIntA: null,
+        oValueIntB: null,
+        oValueChar: null,
+        eId: Number(params.id.split(":")[1]),
+        oValueName: null,
+      };
+      tempStruct.oName = event.target.name.split(":")[0];
+      tempStruct.oValueName = event.target.name.split(":")[1];
+    }
+
+    if (event.target.id === "oValueIntA") {
+      tempStruct.oValueIntA = event.target.value;
+    } else if (event.target.id === "oValueIntB") {
+      tempStruct.oValueIntB = event.target.value;
+    } else if (event.target.id === "oValueChar") {
+      tempStruct.oValueChar = event.target.value;
+    }
+
+    optionsMap.set(event.target.name.split(":")[0], tempStruct);
+    console.log(optionsMap);
+  };
+
+  const handleSaveOptions = async () => {
+    console.log(optionsMap);
+    await axios.post("/api/item/updateOptions", {
+      options: [...optionsMap],
+      id: Number(params.id.split(":")[1]),
+    });
+  };
 
   useEffect(() => {
     handleGetRole();
@@ -56,7 +93,6 @@ const AddOptions = () => {
   // return({uRole !== null && uRole !== undefined && uRole === 0 && category !== null && category !== undefined && category === "Студийные мониторы" && ()})
   if (uRole !== null && uRole !== undefined && uRole === 0) {
     if (category !== null && category !== undefined) {
-      console.log(options);
       switch (category) {
         case "Студийные мониторы":
           return (
@@ -75,17 +111,21 @@ const AddOptions = () => {
                     <TextField
                       sx={{ ml: 1, width: "300px" }}
                       size="small"
-                      name="oValueIntA"
+                      name="Частотный диапозон:Гц"
+                      id="oValueIntA"
                       defaultValue={
                         (options !== undefined && options[6].oValueIntA) || ""
                       }
+                      onChange={handleChangeOptions}
                       variant="standard"
                       placeholder="Введите минимальное хначение"
                     />
                     <TextField
                       sx={{ ml: 1, width: "300px" }}
                       size="small"
-                      name="oValueIntA"
+                      name="Частотный диапозон:Гц"
+                      id="oValueIntB"
+                      onChange={handleChangeOptions}
                       defaultValue={
                         (options !== undefined && options[6].oValueIntB) || ""
                       }
@@ -105,14 +145,18 @@ const AddOptions = () => {
                         maxWidth: "400px",
                         minWidth: "150px",
                       }}
-                      name="uLastName"
+                      name="Выходная мощность:Вт"
+                      className="Вт"
+                      id="oValueIntA"
                       defaultValue={
                         (options !== undefined && options[3].oValueIntA) || ""
                       }
                       size="small"
+                      onChange={handleChangeOptions}
                       variant="standard"
                       placeholder="Введите выходную мощность"
                     />
+                    Вт
                   </Typography>
                 </Box>
                 <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
@@ -125,8 +169,10 @@ const AddOptions = () => {
                         maxWidth: "400px",
                         minWidth: "150px",
                       }}
-                      name="uLastName"
+                      name="Входы/Выходы:"
+                      id="oValueChar"
                       size="small"
+                      onChange={handleChangeOptions}
                       defaultValue={
                         (options !== undefined && options[2].oValueChar) || ""
                       }
@@ -141,7 +187,9 @@ const AddOptions = () => {
                     <TextField
                       sx={{ ml: 1, width: "300px" }}
                       size="small"
-                      name="uEmail"
+                      name="Габариты (Ширина/Высота/Глубина):"
+                      id="oValueChar"
+                      onChange={handleChangeOptions}
                       defaultValue={
                         (options !== undefined && options[4].oValueChar) || ""
                       }
@@ -156,7 +204,9 @@ const AddOptions = () => {
                     <TextField
                       sx={{ ml: 1, width: "300px" }}
                       size="small"
-                      name="uEmail"
+                      name="Габариты в заводской упаковке:"
+                      id="oValueChar"
+                      onChange={handleChangeOptions}
                       variant="standard"
                       defaultValue={
                         (options !== undefined && options[5].oValueChar) || ""
@@ -171,7 +221,9 @@ const AddOptions = () => {
                     <TextField
                       sx={{ ml: 1, width: "300px" }}
                       size="small"
-                      name="uEmail"
+                      name="Вес без упаковки:Кг"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
                       variant="standard"
                       defaultValue={
                         (options !== undefined && options[0].oValueIntA) || ""
@@ -186,7 +238,9 @@ const AddOptions = () => {
                     <TextField
                       sx={{ ml: 1, width: "300px" }}
                       size="small"
-                      name="uEmail"
+                      name="Вес в упаковке:Кг"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
                       variant="standard"
                       defaultValue={
                         (options !== undefined && options[1].oValueIntA) || ""
@@ -196,7 +250,9 @@ const AddOptions = () => {
                   </Typography>
                 </Box>
               </Stack>
-              <Button sx={{ m: 1 }}>Сохранить изменения</Button>
+              <Button sx={{ m: 1 }} onClick={handleSaveOptions}>
+                Сохранить изменения
+              </Button>
             </>
           );
           break;

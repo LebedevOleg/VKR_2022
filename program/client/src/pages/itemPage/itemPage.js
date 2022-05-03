@@ -35,7 +35,7 @@ const ItemPage = () => {
   }, []);
   const handleGetOptions = useCallback(async () => {
     await axios
-      .post("/api/item/getOptions", { id: Number(params.id.split(":")[1]) })
+      .post("/api/item/getOptionsSort", { id: Number(params.id.split(":")[1]) })
       .then((res) => {
         setOptions(res.data.options);
       });
