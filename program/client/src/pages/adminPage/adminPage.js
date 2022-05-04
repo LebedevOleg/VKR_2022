@@ -1,5 +1,5 @@
 import { Box, Divider, Stack, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { Map, Placemark, YMaps } from "react-yandex-maps";
 
 const AdminPage = () => {
@@ -19,7 +19,10 @@ const AdminPage = () => {
             Тестовое место для карты
             <YMaps>
               <Map
-                defaultState={{ center: [55.69055, 37.58298], zoom: 12 }}
+                defaultState={{
+                  center: [55.69052445, 37.58297149804268],
+                  zoom: 17,
+                }}
               ></Map>
             </YMaps>
           </Box>

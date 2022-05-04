@@ -114,7 +114,10 @@ const AddOptions = () => {
                       name="Частотный диапозон:Гц"
                       id="oValueIntA"
                       defaultValue={
-                        (options !== undefined && options[6].oValueIntA) || ""
+                        (options !== undefined &&
+                          options !== null &&
+                          options[6].oValueIntA) ||
+                        ""
                       }
                       onChange={handleChangeOptions}
                       variant="standard"
@@ -127,7 +130,10 @@ const AddOptions = () => {
                       id="oValueIntB"
                       onChange={handleChangeOptions}
                       defaultValue={
-                        (options !== undefined && options[6].oValueIntB) || ""
+                        (options !== undefined &&
+                          options !== null &&
+                          options[6].oValueIntB) ||
+                        ""
                       }
                       variant="standard"
                       placeholder="Введите максимальное значение"
@@ -149,7 +155,10 @@ const AddOptions = () => {
                       className="Вт"
                       id="oValueIntA"
                       defaultValue={
-                        (options !== undefined && options[3].oValueIntA) || ""
+                        (options !== undefined &&
+                          options !== null &&
+                          options[3].oValueIntA) ||
+                        ""
                       }
                       size="small"
                       onChange={handleChangeOptions}
@@ -174,7 +183,10 @@ const AddOptions = () => {
                       size="small"
                       onChange={handleChangeOptions}
                       defaultValue={
-                        (options !== undefined && options[2].oValueChar) || ""
+                        (options !== undefined &&
+                          options !== null &&
+                          options[2].oValueChar) ||
+                        ""
                       }
                       variant="standard"
                       placeholder="Перечислите разъемы через запятую"
@@ -191,7 +203,10 @@ const AddOptions = () => {
                       id="oValueChar"
                       onChange={handleChangeOptions}
                       defaultValue={
-                        (options !== undefined && options[4].oValueChar) || ""
+                        (options !== undefined &&
+                          options !== null &&
+                          options[4].oValueChar) ||
+                        ""
                       }
                       variant="standard"
                       placeholder="Введите габариты объекта"
@@ -209,7 +224,10 @@ const AddOptions = () => {
                       onChange={handleChangeOptions}
                       variant="standard"
                       defaultValue={
-                        (options !== undefined && options[5].oValueChar) || ""
+                        (options !== undefined &&
+                          options !== null &&
+                          options[5].oValueChar) ||
+                        ""
                       }
                       placeholder="Введите габариты объекта в упаковке"
                     />
@@ -226,7 +244,10 @@ const AddOptions = () => {
                       onChange={handleChangeOptions}
                       variant="standard"
                       defaultValue={
-                        (options !== undefined && options[0].oValueIntA) || ""
+                        (options !== undefined &&
+                          options !== null &&
+                          options[0].oValueIntA) ||
+                        ""
                       }
                       placeholder="Введите вес объекта без упаковки"
                     />
@@ -243,7 +264,10 @@ const AddOptions = () => {
                       onChange={handleChangeOptions}
                       variant="standard"
                       defaultValue={
-                        (options !== undefined && options[1].oValueIntA) || ""
+                        (options !== undefined &&
+                          options !== null &&
+                          options[1].oValueIntA) ||
+                        ""
                       }
                       placeholder="Введите вес объекта с упаковкой"
                     />

@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { CreateOrderModal } from "./createOrder.model";
 
 const CartPage = () => {
   const [cart, setCart] = useState(null);
@@ -59,7 +60,7 @@ const CartPage = () => {
                           component="div"
                           sx={{ display: "flex", ml: "auto" }}
                         >
-                          {item.ePrice}
+                          Стоимость: {item.ePrice}
                         </Typography>
                         <IconButton
                           aria-label="shopping cart"
@@ -106,9 +107,7 @@ const CartPage = () => {
           </Box>
         </Grid>
       </Grid>
-      <Button variant="outlined" sx={{ mt: 1 }} color="success">
-        Забронировать
-      </Button>
+      {cart !== null && <CreateOrderModal items={cart} />}
     </>
   );
 };
