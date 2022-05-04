@@ -16,11 +16,15 @@ const CartPage = () => {
   const [cart, setCart] = useState(null);
   const GetCartItem = useCallback(async () => {
     const localCart = localStorage.getItem("cart");
-    await axios
-      .post("/api/cart/getCartItems", { items: localCart })
-      .then((res) => {
-        setCart(res.data.items);
-      });
+    if (localCart !== null) {
+      await axios
+        .post("/api/cart/getCartItems", { items: localCart })
+        .then((res) => {
+          setCart(res.data.items);
+        });
+    } else {
+      setCart([]);
+    }
   }, []);
 
   const handleCreateOrder = async () => {};
@@ -28,6 +32,7 @@ const CartPage = () => {
   useEffect(() => {
     GetCartItem();
   }, [GetCartItem]);
+  console.log(cart);
   return (
     <>
       <Typography variant="h4" component="div" sx={{ textAlign: "center" }}>
@@ -41,65 +46,67 @@ const CartPage = () => {
             </Typography>
             <Stack spacing={1.5}>
               {(cart !== null &&
-                cart.map(
-                  (item) =>
-                    (item !== null && (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "row",
-                          borderBottom: 1,
-                          borderBlockColor: "#757575",
-                        }}
-                      >
-                        <Typography variant="body1" component="div">
-                          {item.eName}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          component="div"
-                          sx={{ display: "flex", ml: "auto" }}
-                        >
-                          Стоимость: {item.ePrice}
-                        </Typography>
-                        <IconButton
-                          aria-label="shopping cart"
-                          sx={{ alignContent: "center" }}
-                          id={item.id}
-                          onClick={async () => {
-                            let tempArray = [];
-
-                            tempArray = localStorage.getItem("cart").split(",");
-                            let index = tempArray.indexOf(toString(item.id));
-                            tempArray.splice(index, 1);
-
-                            localStorage.setItem("cart", tempArray);
-                            GetCartItem();
+                ((cart.length !== 0 &&
+                  cart.map(
+                    (item) =>
+                      item !== null && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            borderBottom: 1,
+                            borderBlockColor: "#757575",
                           }}
                         >
-                          <DeleteForeverIcon />
-                        </IconButton>
-                      </Box>
-                    )) || (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "row",
-                          borderBottom: 1,
-                          borderBlockColor: "#757575",
-                        }}
-                      >
-                        {" "}
-                        <Typography variant="body1" component="div">
-                          В Корзине нет товара
-                        </Typography>{" "}
-                      </Box>
-                    )
-                )) || (
+                          <Typography variant="body1" component="div">
+                            {item.eName}
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            component="div"
+                            sx={{ display: "flex", ml: "auto" }}
+                          >
+                            Стоимость: {item.ePrice}
+                          </Typography>
+                          <IconButton
+                            aria-label="shopping cart"
+                            sx={{ alignContent: "center" }}
+                            id={item.id}
+                            onClick={async () => {
+                              let tempArray = [];
+
+                              tempArray = localStorage
+                                .getItem("cart")
+                                .split(",");
+                              let index = tempArray.indexOf(toString(item.id));
+                              tempArray.splice(index, 1);
+
+                              localStorage.setItem("cart", tempArray);
+                              GetCartItem();
+                            }}
+                          >
+                            <DeleteForeverIcon />
+                          </IconButton>
+                        </Box>
+                      )
+                  )) || (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      borderBottom: 1,
+                      borderBlockColor: "#757575",
+                    }}
+                  >
+                    <Typography variant="body1" component="div">
+                      В Корзине нет товара
+                    </Typography>
+                  </Box>
+                ))) || (
                 <Skeleton
                   variant="rectangular"
                   sx={{ m: 2 }}
-                  width={"99%"}
+                  width={"80%"}
                   height={250}
                 />
               )}
@@ -107,7 +114,7 @@ const CartPage = () => {
           </Box>
         </Grid>
       </Grid>
-      {cart !== null && <CreateOrderModal items={cart} />}
+      {cart !== null && cart.length !== 0 && <CreateOrderModal items={cart} />}
     </>
   );
 };

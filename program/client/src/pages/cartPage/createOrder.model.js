@@ -81,8 +81,15 @@ export function CreateOrderModal(data) {
   };
   const handleSaveOrder = async () => {
     await axios.post(
-      "",
-      { startDate, endDate, addres },
+      "/api/cart/saveOrder",
+      {
+        startDate,
+        endDate,
+        addres,
+        priceAll: price,
+        priceComplite: (price / 100) * 15,
+        items: data.items,
+      },
       {
         headers: { Authorization: `Bearer ${auth.token}` },
       }
@@ -118,7 +125,7 @@ export function CreateOrderModal(data) {
                 maxTime={setHours(setMinutes(new Date(), 0), 23)}
                 startDate={startDate}
                 endDate={endDate}
-                dateFormat="dd-MM-yyyy, HH:mm"
+                dateFormat="dd-MM-yyyy HH:mm"
               />
             </Box>
             <Box>
@@ -140,7 +147,7 @@ export function CreateOrderModal(data) {
                     startDate={startDate}
                     endDate={endDate}
                     minDate={startDate}
-                    dateFormat="dd-MM-yyyy, HH:mm"
+                    dateFormat="dd-MM-yyyy HH:mm"
                   />
                 )) || (
                 <DatePicker
@@ -229,7 +236,9 @@ export function CreateOrderModal(data) {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button disabled={complite}>Подтвердить заявку</Button>
+          <Button disabled={complite} onClick={handleSaveOrder}>
+            Подтвердить заявку
+          </Button>
         </DialogActions>
       </Dialog>
     </>
