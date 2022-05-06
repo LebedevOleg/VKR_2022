@@ -3,9 +3,11 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import {
   Button,
+  Card,
   Divider,
   FormControl,
   Grid,
+  IconButton,
   Input,
   Stack,
   Tab,
@@ -25,6 +27,8 @@ import { AuthContext } from "../../context/authContext";
 import { IMaskInput } from "react-imask";
 import PropTypes from "prop-types";
 import { toast, Toaster } from "react-hot-toast";
+import CreateIcon from "@mui/icons-material/Create";
+import DatePicker from "react-datepicker";
 
 const PhoneNumCustom = forwardRef(function PhoneNumCustom(props, ref) {
   const { onChange, ...other } = props;
@@ -58,6 +62,9 @@ const AccauntPage = () => {
     newPass2: null,
   });
 
+  const [orders, setOrders] = useState(null);
+  const [address, setAddress] = useState();
+
   const handleChangePass = (event) => {
     setUPass({ ...uPass, [event.target.name]: event.target.value });
   };
@@ -81,6 +88,7 @@ const AccauntPage = () => {
         });
       });
   }, []);
+
   const handleSaveChanges = async () => {
     await axios.post(
       "/api/user/changeInfoUser",
@@ -109,9 +117,24 @@ const AccauntPage = () => {
         toast.success("Пароль успешно изменен", { position: "bottom-left" });
       });
   };
+  const getUOrder = useCallback(async () => {
+    await axios
+      .get("/api/orders/getUOrders", {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      })
+      .then((res) => {
+        if (res.data.message === undefined) {
+          setOrders(res.data.orders);
+          setAddress(res.data.places);
+        } else {
+          setOrders(res.data.message);
+        }
+      });
+  }, []);
   useEffect(() => {
     handleGetUserInfo();
-  }, [handleGetUserInfo]);
+    getUOrder();
+  }, [handleGetUserInfo, getUOrder]);
   return (
     <>
       <div>
@@ -203,7 +226,40 @@ const AccauntPage = () => {
               Сохранить изменения
             </Button>
           </TabPanel>
-          <TabPanel value="2">Информация о заказах</TabPanel>
+          <TabPanel value="2">
+            Информация о заказах
+            <Stack spacing={1} divider={<Divider orientation="horizontal" />}>
+              {orders !== null &&
+                orders.map((order) => (
+                  <Box sx={{ display: "flex", flexDirection: "row" }}>
+                    <Typography sx={{ ml: 1, pr: 3 }}>{order.id}</Typography>
+                    <Typography sx={{ ml: 1, pr: 3 }}>
+                      {address[orders.indexOf(order)]}
+                    </Typography>
+                    <Typography sx={{ ml: 1, pr: 3 }}>
+                      {order.priceReady}
+                    </Typography>
+                    <Typography sx={{ ml: 1, pr: 3 }}>
+                      {order.priceAll}
+                    </Typography>
+                    <DatePicker
+                      selected={order.startDate}
+                      selectsStart
+                      showTimeSelect
+                      timeFormat="HH:mm"
+                      startDate={new Date(order.startDate)}
+                      endDate={new Date(order.endDate)}
+                      selectsRange
+                      disabled
+                      dateFormat="dd-MM-yyyy HH:mm"
+                    />
+                    <IconButton id={orders.indexOf(order)}>
+                      <CreateIcon />
+                    </IconButton>
+                  </Box>
+                ))}
+            </Stack>
+          </TabPanel>
           <TabPanel value="3">
             Смена пароля
             <Stack spacing={1} divider={<Divider orientation="horizontal" />}>

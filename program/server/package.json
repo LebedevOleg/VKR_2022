@@ -16,6 +16,7 @@
   "author": "lebedevoleg72@gmail.com",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0-rc.10",
     "config": "^3.3.7",
