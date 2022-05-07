@@ -20,7 +20,7 @@ const AdminPage = () => {
             <YMaps>
               <Map
                 defaultState={{
-                  center: [55.69052445, 37.58297149804268],
+                  center: [55.6905557, 37.5830459],
                   zoom: 17,
                 }}
               ></Map>

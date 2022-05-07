@@ -28,6 +28,7 @@ const SignModal = () => {
     password: "",
     firstName: "",
     lastName: "",
+    phone: "",
   });
 
   const loginFunc = async () => {

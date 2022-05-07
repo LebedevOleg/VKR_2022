@@ -9,6 +9,11 @@ import {
   Divider,
   Input,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -21,6 +26,8 @@ import { AuthContext } from "../../context/authContext";
 import SignInOrSignUp from "./signInOrSignUp";
 
 export function CreateOrderModal(data) {
+  const token = "2256f7337a24297300f30f6c84e4990efb76ddd6";
+  const secret = "76249429c44e0cad78ead8fcf0e3896d85fa72c6";
   const [openSign, setOpenSign] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(null);
@@ -28,15 +35,22 @@ export function CreateOrderModal(data) {
   const [complite, setComplite] = useState(true);
   const auth = useContext(AuthContext);
   const [addres, setAddres] = useState({
-    city: "Москва",
-    road: null,
-    house: null,
+    address: null,
     lat: null,
     lon: null,
   });
   const [systemAddres, setSystemAddres] = useState("");
   let price = 0;
-  data.items.map((item) => (price += item.ePrice));
+  if (data.items !== null && endDate !== null) {
+    data.items.map((item) => {
+      if (item !== null) {
+        price += (item.priceForHour * (endDate - startDate)) / (1000 * 60 * 60);
+      }
+      if (price <= 6000) {
+        price += 1500;
+      }
+    });
+  }
 
   const handleClickOpen = () => {
     setOpenSign(true);
@@ -47,38 +61,16 @@ export function CreateOrderModal(data) {
     setComplite(true);
     setOpenSign(false);
   };
-  const urlStart = "https://nominatim.openstreetmap.org/search/";
-  const urlEnd = "?format=json&addressdetails=1&limit=1&polygon_svg=1";
-  const handleGetCoordinate = (event) => {
+
+  // !old not gold
+  /*   const urlStart = "https://nominatim.openstreetmap.org/search/";
+  const urlEnd = "?format=json&addressdetails=1&limit=1&polygon_svg=1"; */
+  /* const handleGetCoordinate = (event) => {
     setAddres({
       ...addres,
       [event.target.name]: event.target.value.replace(/[/ -.]/g, "+"),
     });
-  };
-  const getAddress = async () => {
-    console.log(addres.road, addres.house);
-    if (addres.house !== null && addres.road !== null) {
-      await axios
-        .get(
-          urlStart +
-            addres.house +
-            "+" +
-            addres.road +
-            "+" +
-            addres.city +
-            urlEnd
-        )
-        .then((res) => {
-          setSystemAddres(res.data[0].display_name);
-          setAddres({
-            ...addres,
-            lat: res.data[0].lat,
-            lon: res.data[0].lon,
-          });
-          console.log(addres);
-        });
-    }
-  };
+  }; */
   const handleSaveOrder = async () => {
     await axios.post(
       "/api/cart/saveOrder",
@@ -94,6 +86,25 @@ export function CreateOrderModal(data) {
         headers: { Authorization: `Bearer ${auth.token}` },
       }
     );
+    localStorage.removeItem("cart");
+    window.location = "/profile";
+  };
+
+  const handlerChangeAddress = (event) => {
+    setAddres({ ...addres, address: event.target.value });
+  };
+  const handleGetAddress = async (event) => {
+    await axios
+      .post("/api/pars/addGeo", { query: addres.address })
+      .then((res) => {
+        setSystemAddres(res.data.address);
+        setAddres({
+          ...addres,
+          address: res.data.address,
+          lat: res.data.lat,
+          lon: res.data.lon,
+        });
+      });
   };
 
   return (
@@ -135,7 +146,9 @@ export function CreateOrderModal(data) {
                 startDate.getFullYear() === endDate.getFullYear() && (
                   <DatePicker
                     selected={endDate}
-                    onChange={(date) => setEndDate(date)}
+                    onChange={(date) => {
+                      setEndDate(date);
+                    }}
                     selectsEnd
                     showTimeSelect
                     minTime={setHours(
@@ -152,7 +165,9 @@ export function CreateOrderModal(data) {
                 )) || (
                 <DatePicker
                   selected={endDate}
-                  onChange={(date) => setEndDate(date)}
+                  onChange={(date) => {
+                    setEndDate(date);
+                  }}
                   selectsEnd
                   showTimeSelect
                   minTime={setHours(setMinutes(new Date(), 0), 6)}
@@ -170,6 +185,87 @@ export function CreateOrderModal(data) {
                 Введите адрес, куда будет произовдится доставка
               </Typography>
               <TextField
+                sx={{ ml: 1, width: 400 }}
+                size="small"
+                label="Адрес"
+                name="city"
+                onChange={handlerChangeAddress}
+                variant="standard"
+                placeholder="Введите адресс"
+              />
+            </Box>
+            <Button onClick={handleGetAddress}>Подтвердить адрес</Button>
+            <Typography>
+              Внимательно проверьте адресс зафиксированный системой
+            </Typography>
+            <Typography>Адрес: {systemAddres}</Typography>
+            <Button
+              onClick={() => {
+                console.log(dateComplite);
+                setDateComplite(false);
+                console.log(dateComplite);
+              }}
+              disabled={
+                !endDate || systemAddres === "" || systemAddres === null
+              }
+            >
+              Подтвердить время и место
+            </Button>
+          </Box>
+          <Box sx={{ ml: 4, borderRight: 1, pr: 4 }}>
+            Введите/Подтвердите ваши персональный данные
+            <SignInOrSignUp setCheck={setComplite} check={dateComplite} />
+          </Box>
+          <Box sx={{ ml: 4 }}>
+            Счет:
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Наименование</TableCell>
+                  <TableCell>Цена/час</TableCell>
+                  <TableCell>Итого</TableCell>
+                </TableRow>
+              </TableHead>
+              {data.items.map(
+                (item) =>
+                  item !== null && (
+                    <TableBody>
+                      <TableCell>{item.eName}</TableCell>
+                      <TableCell>{item.priceForHour} руб/час</TableCell>
+                      <TableCell>
+                        {endDate !== null &&
+                          (item.priceForHour * (endDate - startDate)) /
+                            (1000 * 60 * 60)}{" "}
+                        руб
+                      </TableCell>
+                    </TableBody>
+                  )
+              )}
+            </Table>
+            <Stack spacing={0.2} divider={<Divider orientation="horizontal" />}>
+              <Typography>Итого: {price}</Typography>
+              <Typography>
+                К оплате авансом идет 15% от всей стоимости
+              </Typography>
+              <Typography>К оплате: {(price / 100) * 15} </Typography>
+            </Stack>
+            <Typography variant="caption">
+              Если сумма аренды вышла меньше 6тыс.руб, то доставка оплачивается
+              дополнительно 1500руб
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button disabled={complite} onClick={handleSaveOrder}>
+            Подтвердить заявку
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
+/* 
+<TextField
                 sx={{ ml: 1, width: "200px" }}
                 size="small"
                 label="Город"
@@ -198,49 +294,4 @@ export function CreateOrderModal(data) {
                 onChange={handleGetCoordinate}
                 variant="standard"
               />
-              <Button onClick={getAddress}>Зафиксировать адрес</Button>
-            </Box>
-            <Typography>
-              Внимательно проверьте адресс зафиксированный системой
-            </Typography>
-            <Typography>Адрес: {systemAddres}</Typography>
-            <Button
-              onClick={() => {
-                console.log(dateComplite);
-                setDateComplite(false);
-                console.log(dateComplite);
-              }}
-              disabled={!endDate}
-            >
-              Подтвердить время и место
-            </Button>
-          </Box>
-          <Box sx={{ ml: 5, borderRight: 1, pr: 5 }}>
-            Введите/Подтвердите ваши персональный данные
-            <SignInOrSignUp setCheck={setComplite} check={dateComplite} />
-          </Box>
-          <Box sx={{ ml: 5 }}>
-            Счет:
-            <Stack spacing={0.2} divider={<Divider orientation="horizontal" />}>
-              {data.items.map((item) => (
-                <Typography>
-                  {item.eName} -- Стоимость: {item.ePrice}
-                </Typography>
-              ))}
-              <Typography>Итого: {price}</Typography>
-              <Typography>
-                К оплате авансом идет 15% от всей стоимости
-              </Typography>
-              <Typography>К оплате: {(price / 100) * 15} </Typography>
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button disabled={complite} onClick={handleSaveOrder}>
-            Подтвердить заявку
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
-}
+              <Button onClick={getAddress}>Зафиксировать адрес</Button> */

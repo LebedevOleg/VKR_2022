@@ -34,7 +34,28 @@ router.post("/getItem", async (req, res) => {
 router.get("/getItems", async (req, res) => {
   try {
     const itemsArray = await db.query("SELECT * FROM equipment");
-    res.status(201).json({ items: itemsArray.rows });
+    const items = new Map();
+    let minPrice = itemsArray.rows[0].priceForHour;
+    let maxPrice = itemsArray.rows[0].priceForHour;
+    for (let i = 0; i < itemsArray.rowCount; i++) {
+      if (minPrice > itemsArray.rows[i].priceForHour) {
+        minPrice = itemsArray.rows[i].priceForHour;
+      }
+      if (maxPrice < itemsArray.rows[i].priceForHour) {
+        maxPrice = itemsArray.rows[i].priceForHour;
+      }
+      if (items.has(itemsArray.rows[i].eName)) {
+        if (
+          items.get(itemsArray.rows[i].eName).eUsed >= itemsArray.rows[i].eUsed
+        ) {
+          items.set(itemsArray.rows[i].eName, itemsArray.rows[i]);
+        }
+      } else {
+        items.set(itemsArray.rows[i].eName, itemsArray.rows[i]);
+      }
+    }
+    let array = Array.from(items, ([name, value]) => ({ name, value }));
+    res.status(201).json({ items: array, maxPrice, minPrice });
   } catch (e) {
     res.status(400).json({ message: e.message });
   }
@@ -96,12 +117,12 @@ router.post("/getOptionsSort", async (req, res) => {
 router.post("/updateOptions", async (req, res) => {
   const { options, id } = req.body;
   options.map(async (option) => {
-    //!option[0] - имя option[1] - параметры
+    //!option[0] - имя option, [1] - параметры
     const check = await db.query(
       'SELECT id, "oValueIntA", "oValueIntB" FROM options WHERE "oName" = $1 and "eId" =$2',
       [option[0], id]
     );
-    console.log(check);
+    console.log(check.rowCount, check.rows);
     if (check.rowCount === 0) {
       await db.query(
         'INSERT INTO options( "oName", "oValueChar", "eId", "oValueName", "oValueIntA", "oValueIntB") VALUES ( $1, $2, $3, $4, $5, $6)',
@@ -115,7 +136,7 @@ router.post("/updateOptions", async (req, res) => {
         ]
       );
     } else {
-      if (check.rows[0].oValueIntB === 0) {
+      if (option[1].oValueIntA === null && option[1].oValueIntB === null) {
         await db.query(
           'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eId"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eId"=$3',
           [
@@ -123,13 +144,28 @@ router.post("/updateOptions", async (req, res) => {
             option[1].oValueChar,
             option[1].eId,
             option[1].oValueName,
-            Number(option[1].oValueIntA),
+            Number(check.rows[0].oValueIntA),
+            Number(check.rows[0].oValueIntB),
+          ]
+        );
+      } else if (
+        option[1].oValueIntA === null &&
+        option[1].oValueIntB !== null
+      ) {
+        await db.query(
+          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eId"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eId"=$3',
+          [
+            option[1].oName,
+            option[1].oValueChar,
+            option[1].eId,
+            option[1].oValueName,
+            Number(check.rows[0].oValueIntA),
             Number(option[1].oValueIntB),
           ]
         );
       } else if (
-        check.rows[0].oValueIntB !== 0 &&
-        option[0].oValueIntB === null
+        option[1].oValueIntA !== null &&
+        option[1].oValueIntB === null
       ) {
         await db.query(
           'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eId"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eId"=$3',
@@ -142,10 +178,7 @@ router.post("/updateOptions", async (req, res) => {
             Number(check.rows[0].oValueIntB),
           ]
         );
-      } else if (
-        check.rows[0].oValueIntB !== 0 &&
-        option[0].oValueIntB !== null
-      ) {
+      } else {
         await db.query(
           'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eId"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eId"=$3',
           [

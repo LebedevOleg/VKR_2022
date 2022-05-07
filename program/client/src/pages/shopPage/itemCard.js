@@ -29,6 +29,9 @@ const ItemCard = (data) => {
         <Typography variant="body1" color="text.secondary">
           {data.item.eDescription.slice(0, 100) + "..."}
         </Typography>
+        <Typography align="right" variant="h6">
+          {data.item.priceForHour} руб./час
+        </Typography>
       </CardContent>
       <CardActions>
         <Button

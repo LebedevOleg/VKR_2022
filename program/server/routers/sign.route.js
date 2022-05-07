@@ -79,11 +79,19 @@ router.post(
           .json({ message: "Пользователь с такой почтой уже существует" });
       }
       const hashedPassword = await bcrypt.hash(password, 12);
-      console.log(firstName, lastName, email, hashedPassword);
-      const newUser = await db.query(
-        'INSERT INTO public.users("uName", "uLastName", "uEmail", "uPassword")VALUES ($1,$2,$3,$4) RETURNING id',
-        [firstName, lastName, email, hashedPassword]
-      );
+      let newUser;
+      if (phone === "") {
+        newUser = await db.query(
+          'INSERT INTO public.users("uName", "uLastName", "uEmail", "uPassword")VALUES ($1,$2,$3,$4) RETURNING id',
+          [firstName, lastName, email, hashedPassword]
+        );
+      } else {
+        newUser = await db.query(
+          'INSERT INTO public.users("uName", "uLastName", "uEmail", "uPassword" ,"uPhone")VALUES ($1,$2,$3,$4, $5) RETURNING id',
+          [firstName, lastName, email, hashedPassword, phone]
+        );
+      }
+
       const token = jwt.sign(
         { userId: newUser.rows[0].id },
         config.get("jwtSecret"),

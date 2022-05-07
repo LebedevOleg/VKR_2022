@@ -66,7 +66,7 @@ const CartPage = () => {
                             component="div"
                             sx={{ display: "flex", ml: "auto" }}
                           >
-                            Стоимость: {item.ePrice}
+                            Стоимость: {item.priceForHour} руб/час
                           </Typography>
                           <IconButton
                             aria-label="shopping cart"
@@ -114,7 +114,9 @@ const CartPage = () => {
           </Box>
         </Grid>
       </Grid>
-      {cart !== null && cart.length !== 0 && <CreateOrderModal items={cart} />}
+      {cart !== null && cart.length !== 0 && cart[0] !== null && (
+        <CreateOrderModal items={cart} />
+      )}
     </>
   );
 };

@@ -9,8 +9,15 @@ import {
   Grid,
   IconButton,
   Input,
+  Popover,
   Stack,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -29,6 +36,7 @@ import PropTypes from "prop-types";
 import { toast, Toaster } from "react-hot-toast";
 import CreateIcon from "@mui/icons-material/Create";
 import DatePicker from "react-datepicker";
+import { Map, YMaps, Placemark } from "react-yandex-maps";
 
 const PhoneNumCustom = forwardRef(function PhoneNumCustom(props, ref) {
   const { onChange, ...other } = props;
@@ -47,6 +55,19 @@ PhoneNumCustom.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
+const DataInput = forwardRef(({ value }) => {
+  return (
+    <TextField
+      sx={{ width: 290, textAlign: "center" }}
+      size="small"
+      className="example-custom-input"
+      variant="standard"
+      value={value}
+      disabled
+    />
+  );
+});
+
 const AccauntPage = () => {
   const [tab, setTab] = useState("1");
   const auth = useContext(AuthContext);
@@ -61,6 +82,17 @@ const AccauntPage = () => {
     newPass1: null,
     newPass2: null,
   });
+  //#region map func
+  const [openMap, setOpenMap] = useState(null);
+  const map = Boolean(openMap);
+  const handleOpenMap = (event) => {
+    setOpenMap(event.currentTarget);
+  };
+  const handleCloseMap = () => {
+    setOpenMap(null);
+  };
+
+  //#endregion
 
   const [orders, setOrders] = useState(null);
   const [address, setAddress] = useState();
@@ -228,37 +260,90 @@ const AccauntPage = () => {
           </TabPanel>
           <TabPanel value="2">
             Информация о заказах
-            <Stack spacing={1} divider={<Divider orientation="horizontal" />}>
-              {orders !== null &&
-                orders.map((order) => (
-                  <Box sx={{ display: "flex", flexDirection: "row" }}>
-                    <Typography sx={{ ml: 1, pr: 3 }}>{order.id}</Typography>
-                    <Typography sx={{ ml: 1, pr: 3 }}>
-                      {address[orders.indexOf(order)]}
-                    </Typography>
-                    <Typography sx={{ ml: 1, pr: 3 }}>
-                      {order.priceReady}
-                    </Typography>
-                    <Typography sx={{ ml: 1, pr: 3 }}>
-                      {order.priceAll}
-                    </Typography>
-                    <DatePicker
-                      selected={order.startDate}
-                      selectsStart
-                      showTimeSelect
-                      timeFormat="HH:mm"
-                      startDate={new Date(order.startDate)}
-                      endDate={new Date(order.endDate)}
-                      selectsRange
-                      disabled
-                      dateFormat="dd-MM-yyyy HH:mm"
-                    />
-                    <IconButton id={orders.indexOf(order)}>
-                      <CreateIcon />
-                    </IconButton>
-                  </Box>
-                ))}
-            </Stack>
+            <TableContainer>
+              <Table aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">Номер</TableCell>
+                    <TableCell align="center">Адрес</TableCell>
+                    <TableCell align="center">Даты</TableCell>
+                    <TableCell align="center">Оплачено</TableCell>
+                    <TableCell align="center">Вся сумма</TableCell>
+                  </TableRow>
+                </TableHead>
+                {orders !== null &&
+                  orders.map((order) => (
+                    <TableBody key={order.id}>
+                      <TableCell align="center">{order.id}</TableCell>
+                      <TableCell
+                        aria-owns={map ? "mouse-over-popover" : undefined}
+                        aria-haspopup="true"
+                        onMouseEnter={handleOpenMap}
+                        onMouseLeave={handleCloseMap}
+                      >
+                        <Typography align="center">
+                          {address[orders.indexOf(order)].address}
+                        </Typography>
+                        <Popover
+                          id="mouse-over-popover"
+                          open={map}
+                          anchorEl={openMap}
+                          anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left",
+                          }}
+                          transformOrigin={{
+                            vertical: "top",
+                            horizontal: "left",
+                          }}
+                          onClose={handleCloseMap}
+                          disableRestoreFocus
+                        >
+                          <YMaps>
+                            <Map
+                              defaultState={{
+                                center: [
+                                  address[orders.indexOf(order)].lat,
+                                  address[orders.indexOf(order)].lon,
+                                ],
+                                zoom: 16,
+                              }}
+                            >
+                              <Placemark
+                                defaultGeometry={[
+                                  address[orders.indexOf(order)].lat,
+                                  address[orders.indexOf(order)].lon,
+                                ]}
+                              />
+                            </Map>
+                          </YMaps>
+                        </Popover>
+                      </TableCell>
+                      <TableCell align="center">
+                        <DatePicker
+                          selected={new Date(order.startDate)}
+                          selectsStart
+                          showTimeSelect
+                          timeFormat="HH:mm"
+                          startDate={new Date(order.startDate)}
+                          endDate={new Date(order.endDate)}
+                          selectsRange
+                          disabled
+                          dateFormat="dd-MM-yyyy HH:mm"
+                          customInput={<DataInput />}
+                        />
+                      </TableCell>
+                      <TableCell align="center">{order.priceReady}</TableCell>
+                      <TableCell align="center">{order.priceAll}</TableCell>
+                      <TableCell>
+                        <IconButton id={orders.indexOf(order)}>
+                          <CreateIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableBody>
+                  ))}
+              </Table>
+            </TableContainer>
           </TabPanel>
           <TabPanel value="3">
             Смена пароля

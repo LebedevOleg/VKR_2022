@@ -17,9 +17,10 @@ router.post("/getCartItems", async (req, res) => {
     const result = [];
     for (let i = 0; i < itemsArr.length; i++) {
       await db
-        .query('SELECT id, "eName", "ePrice" FROM equipment WHERE "id"=$1', [
-          Number(itemsArr[i]),
-        ])
+        .query(
+          'SELECT id, "eName", "priceForHour" FROM equipment WHERE "id"=$1',
+          [Number(itemsArr[i])]
+        )
         .then((res) => {
           result.push(res.rows[0]);
         });

@@ -43,7 +43,7 @@ router.get("/getUOrders", auth, async (req, res) => {
               `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
             )
             .then((result) => {
-              oPlace.push(result.data.display_name);
+              oPlace.push({ address: result.data.display_name, lat, lon });
             });
         });
     }
