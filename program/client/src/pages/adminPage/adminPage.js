@@ -1,6 +1,7 @@
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { Map, Placemark, YMaps } from "react-yandex-maps";
+import AddEquipModal from "./addEquip.modal";
 
 const AdminPage = () => {
   return (
@@ -14,7 +15,12 @@ const AdminPage = () => {
           divider={<Divider orientation="horizontal" flexItem />}
         >
           <Box>Статистика?? что-то сюда надо</Box>
-          <Box>Добавление оборудования в магазин аренды</Box>
+          <Box>
+            Добавление оборудования в магазин аренды
+            <Box>
+              <AddEquipModal />
+            </Box>
+          </Box>
           <Box>
             Тестовое место для карты
             <YMaps>

@@ -61,6 +61,43 @@ router.get("/getItems", async (req, res) => {
   }
 });
 
+// */api/item/getFilterItems
+router.post("/getFilterItems", async (req, res) => {
+  try {
+    const { price, category } = req.body;
+    console.log(price, category);
+    let itemsArray;
+    if (category === "all") {
+      itemsArray = await db.query(
+        'SELECT * FROM equipment WHERE "priceForHour" <$2 and "priceForHour" >$1',
+        [price[0], price[1]]
+      );
+    } else {
+      itemsArray = await db.query(
+        'SELECT * FROM equipment WHERE "priceForHour" <$2 and "priceForHour" >$1 and "eCategory" = $3',
+        [price[0], price[1], category]
+      );
+    }
+    console.log(itemsArray);
+    const items = new Map();
+    for (let i = 0; i < itemsArray.rowCount; i++) {
+      if (items.has(itemsArray.rows[i].eName)) {
+        if (
+          items.get(itemsArray.rows[i].eName).eUsed >= itemsArray.rows[i].eUsed
+        ) {
+          items.set(itemsArray.rows[i].eName, itemsArray.rows[i]);
+        }
+      } else {
+        items.set(itemsArray.rows[i].eName, itemsArray.rows[i]);
+      }
+    }
+    let array = Array.from(items, ([name, value]) => ({ name, value }));
+    res.status(201).json({ items: array });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
 // */api/item/getCategory
 router.post("/getCategory", async (req, res) => {
   try {
@@ -70,6 +107,26 @@ router.post("/getCategory", async (req, res) => {
       [id]
     );
     res.status(201).json({ category: category.rows[0].eCategory });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+// */api/item/getAllCategory
+router.get("/getAllCategory", async (req, res) => {
+  try {
+    const categoryArr = await db.query('SELECT "eCategory" FROM equipment');
+    const categorys = new Map();
+    for (let i = 0; i < categoryArr.rowCount; i++) {
+      if (!categorys.has(categoryArr.rows[i].eCategory)) {
+        categorys.set(
+          categoryArr.rows[i].eCategory,
+          categoryArr.rows[i].eCategory
+        );
+      }
+    }
+    let array = Array.from(categorys, ([name, value]) => ({ name, value }));
+    res.status(201).json({ category: array });
   } catch (e) {
     res.status(400).json({ message: e.message });
   }

@@ -11,7 +11,6 @@ import React from "react";
 
 const ItemCard = (data) => {
   //data.item - туда приходят данные
-  console.log(data.item);
   const handleSaveItem = () => {
     const cartArray = [];
     if (localStorage.getItem("cart")) {
