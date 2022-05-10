@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { forwardRef, useState } from "react";
+import axios from "axios";
 
 const AddEquipModal = () => {
   const [open, setOpen] = useState(false);
@@ -25,13 +26,20 @@ const AddEquipModal = () => {
     number: 1,
   });
 
+  const handleSaveEquip = async () => {
+    await axios.post("", { ...formEquip });
+  };
+
   const handleChangeForm = (event) => {
-    setFormEquip({ ...formEquip, [event.target.name]: event.target.value });
+    console.log(event.target.name);
     if (event.target.name === "price") {
       setFormEquip({
         ...formEquip,
+        [event.target.name]: Number(event.target.value),
         priceForHour: (event.target.value / 100) * 15,
       });
+    } else {
+      setFormEquip({ ...formEquip, [event.target.name]: event.target.value });
     }
   };
 
@@ -81,7 +89,7 @@ const AddEquipModal = () => {
                 </MenuItem>
               </Select>
             </FormControl>
-            <Typography>Введите название товара:</Typography>
+            <Typography sx={{ mt: 0.5 }}>Введите название товара:</Typography>
             <TextField
               variant="standard"
               name="name"
@@ -90,7 +98,9 @@ const AddEquipModal = () => {
               label="Наименование:"
               helperText={`Пользователь увидит: ${formEquip.category} ${formEquip.name}`}
             ></TextField>
-            <Typography>Введите цену за которую куплен товар:</Typography>
+            <Typography sx={{ mt: 0.5 }}>
+              Введите цену за которую куплен товар:
+            </Typography>
             <TextField
               variant="standard"
               name="price"
@@ -101,7 +111,9 @@ const AddEquipModal = () => {
               sx={{ ml: 1, maxWidth: 300 }}
               label="Цена покупки:"
             />
-            <Typography>Введите цену аренды за час:</Typography>
+            <Typography sx={{ mt: 0.5 }}>
+              Введите цену аренды за час:
+            </Typography>
             <TextField
               variant="standard"
               name="priceForHour"
@@ -113,7 +125,7 @@ const AddEquipModal = () => {
               sx={{ ml: 1, maxWidth: 300 }}
               label="Цена за час аренды:"
             />
-            <Typography>Введите Описание товара:</Typography>
+            <Typography sx={{ mt: 0.5 }}>Введите Описание товара:</Typography>
             <TextField
               variant="standard"
               name="decription"
@@ -123,18 +135,31 @@ const AddEquipModal = () => {
               multiline
               label="Описание:"
             />
-            <Typography>Введите колличество товара:</Typography>
+            <Typography sx={{ mt: 0.5 }}>
+              Введите колличество товара:
+            </Typography>
             <TextField
               variant="standard"
-              name="decription"
+              name="number"
               type="number"
-              value={formEquip.number}
+              defaultValue={formEquip.number}
               InputLabelProps={{ shrink: true }}
               onChange={handleChangeForm}
               sx={{ ml: 1 }}
               label="Колличество:"
             />
-            <Button>Сохранить</Button>
+            <Button
+              variant="contained"
+              onClick={handleSaveEquip}
+              sx={{
+                mt: 1,
+                maxWidth: 450,
+                display: "flex",
+                alignSelf: "center",
+              }}
+            >
+              Сохранить
+            </Button>
           </Box>
         </DialogContent>
       </Dialog>
