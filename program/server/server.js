@@ -11,8 +11,10 @@ const ordersRouter = require("./routers/orders.route");
 
 const app = express();
 const PORT = config.get("port") || 5000;
+app.use(express.static("db"));
 app.use(express.json({ extended: true, limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
+
 app.use("/api/sign", signRouter);
 app.use("/api/user", userRouter);
 app.use("/api/item", itemRouter);

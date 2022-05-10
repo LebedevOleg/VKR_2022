@@ -50,7 +50,7 @@ const AddEquipModal = () => {
   const handleDownloadImage = async (event) => {
     await axios.post("api/pars/downloadImage", {
       url: url,
-      fileName: formEquip.name.replace(" ", "_") + ".png",
+      fileName: formEquip.name,
     });
   };
 

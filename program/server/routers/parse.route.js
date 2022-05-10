@@ -10,6 +10,7 @@ const { default: axios } = require("axios");
 const opencage = require("opencage-api-client");
 const request = require("request");
 const fs = require("fs");
+const { dirname } = require("path");
 
 const router = new Router();
 
@@ -68,11 +69,21 @@ router.post("/addGeo", async (req, res) => {
 //* api/pars/downloadImage
 router.post("/downloadImage", async (req, res) => {
   const { url, fileName } = req.body;
+  const appDir = dirname(require.main.filename);
+  console.log(appDir);
   request.head(url, function (err, res, body) {
     console.log("content-type:", res.headers["content-type"]);
     console.log("content-length:", res.headers["content-length"]);
-    request(url).pipe(fs.createWriteStream("C:/db/images/" + fileName));
+    request(url).pipe(
+      fs.createWriteStream(
+        appDir + "/db/" + fileName.replace(" ", "_") + ".png"
+      )
+    );
   });
+  await db.query(
+    'INSERT INTO public.equip_image(	"fileName", "eName")	VALUES ( $1, $2)',
+    [fileName.replace(" ", "_") + ".png", fileName]
+  );
 });
 
 router.post("/test", async (req, res) => {
