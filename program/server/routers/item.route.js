@@ -8,14 +8,6 @@ const auth = require("../middleware/auth.middleware");
 
 const router = new Router();
 
-// */api/sign
-router.post("/", async (req, res) => {
-  try {
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
-});
-
 // */api/item/getItem
 router.post("/getItem", async (req, res) => {
   try {
@@ -251,6 +243,23 @@ router.post("/updateOptions", async (req, res) => {
     }
   });
   res.status(201);
+});
+
+// */api/item/addItem
+router.post("/addItem", async (req, res) => {
+  try {
+    const { category, name, price, description, priceForHour, number } =
+      req.body;
+    for (let i = 0; i < number; i++) {
+      await db.query(
+        'INSERT INTO equipment( "eName", "ePrice", "eDescription", "eCategory", "priceForHour")	VALUES ( $1, $2, $3, $4, $5)',
+        [category + " " + name, price, description, category, priceForHour]
+      );
+    }
+    res.status(201).json({ item: item.rows[0] });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
 });
 
 module.exports = router;

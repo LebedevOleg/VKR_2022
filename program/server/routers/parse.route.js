@@ -8,6 +8,8 @@ const rp = require("request-promise");
 const cheerio = require("cheerio");
 const { default: axios } = require("axios");
 const opencage = require("opencage-api-client");
+const request = require("request");
+const fs = require("fs");
 
 const router = new Router();
 
@@ -61,6 +63,16 @@ router.post("/addGeo", async (req, res) => {
   } catch (e) {
     res.json({ message: e.message });
   }
+});
+
+//* api/pars/downloadImage
+router.post("/downloadImage", async (req, res) => {
+  const { url, fileName } = req.body;
+  request.head(url, function (err, res, body) {
+    console.log("content-type:", res.headers["content-type"]);
+    console.log("content-length:", res.headers["content-length"]);
+    request(url).pipe(fs.createWriteStream("C:/db/images/" + fileName));
+  });
 });
 
 router.post("/test", async (req, res) => {
