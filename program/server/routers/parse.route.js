@@ -68,22 +68,35 @@ router.post("/addGeo", async (req, res) => {
 
 //* api/pars/downloadImage
 router.post("/downloadImage", async (req, res) => {
-  const { url, fileName } = req.body;
-  const appDir = dirname(require.main.filename);
-  console.log(appDir);
-  request.head(url, function (err, res, body) {
-    console.log("content-type:", res.headers["content-type"]);
-    console.log("content-length:", res.headers["content-length"]);
-    request(url).pipe(
-      fs.createWriteStream(
-        appDir + "/db/" + fileName.replace(" ", "_") + ".png"
-      )
+  try {
+    const { url, fileName } = req.body;
+
+    const appDir = dirname(require.main.filename);
+    const count = await db.query(
+      'select * from equip_image where "eName" = $1',
+      [fileName]
     );
-  });
-  await db.query(
-    'INSERT INTO public.equip_image(	"fileName", "eName")	VALUES ( $1, $2)',
-    [fileName.replace(" ", "_") + ".png", fileName]
-  );
+    request.head(url, function (err, res, body) {
+      console.log("content-type:", res.headers["content-type"]);
+      console.log("content-length:", res.headers["content-length"]);
+      request(url).pipe(
+        fs.createWriteStream(
+          appDir +
+            "/db/" +
+            fileName.replace(" ", "_") +
+            "_" +
+            count.rowCount +
+            ".png"
+        )
+      );
+    });
+    await db.query(
+      'INSERT INTO public.equip_image(	"fileName", "eName")	VALUES ( $1, $2)',
+      [fileName.replace(" ", "_") + "_" + count.rowCount + ".png", fileName]
+    );
+  } catch (e) {
+    res.status(401).json({ message: e.message });
+  }
 });
 
 router.post("/test", async (req, res) => {

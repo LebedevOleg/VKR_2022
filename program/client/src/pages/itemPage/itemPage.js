@@ -6,6 +6,7 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  Pagination,
   Skeleton,
   Table,
   TableBody,
@@ -25,6 +26,8 @@ const ItemPage = () => {
   const [item, setItem] = useState(null);
   const [options, setOptions] = useState(null);
   const params = useParams();
+  const [images, setImage] = useState([null]);
+  const [visImage, setVisImage] = useState("");
 
   const handleGetItem = useCallback(async () => {
     await axios
@@ -33,17 +36,30 @@ const ItemPage = () => {
         setItem(res.data.item);
       });
   }, []);
+  const handleGetImage = useCallback(async () => {
+    await axios
+      .post("/api/item/getImage", {
+        id: Number(params.id.split(":")[1]),
+      })
+      .then((res) => {
+        if (res.data.status === "ok") {
+          setImage(res.data.image);
+          setVisImage(res.data.image[0].fileName);
+        }
+      });
+  }, []);
   const handleGetOptions = useCallback(async () => {
     await axios
-      .post("/api/item/getOptionsSort", { id: Number(params.id.split(":")[1]) })
+      .post("/api/item/getOptions", { id: Number(params.id.split(":")[1]) })
       .then((res) => {
         setOptions(res.data.options);
       });
   }, []);
   useEffect(() => {
+    handleGetImage();
     handleGetItem();
     handleGetOptions();
-  }, [handleGetItem, handleGetOptions]);
+  }, [handleGetItem, handleGetOptions, handleGetImage]);
 
   if (item === null) {
     return (
@@ -58,11 +74,21 @@ const ItemPage = () => {
   return (
     <Box>
       <Card sx={{ display: "flex" }}>
-        <CardMedia
-          component="img"
-          sx={{ width: 250, m: 5 }}
-          image="https://pop-music.ru/upload/resize_cache/iblock/dbe/417_378_1/dbe88b4c2123956db0af0c1821c22acb.jpg"
-        />
+        <CardMedia>
+          {visImage !== "" && images[0] !== null && (
+            <img
+              src={"http://localhost:5000/" + visImage}
+              style={{ width: 250 }}
+            />
+          )}
+          <Pagination
+            count={images.length}
+            defaultPage={1}
+            onChange={(event, value) => {
+              setVisImage(images[value - 1].fileName);
+            }}
+          />
+        </CardMedia>
         <CardContent sx={{ flex: "1 0 auto" }}>
           <Box
             sx={{
@@ -93,7 +119,7 @@ const ItemPage = () => {
                       <TableCell>{option.oName}</TableCell>{" "}
                       <TableCell>
                         {(option.oValueChar === null &&
-                          ((option.oValueIntB === null &&
+                          ((option.oValueIntB === 0 &&
                             option.oValueIntA.toString() +
                               " " +
                               option.oValueName) ||

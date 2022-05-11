@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 import ItemCard from "./itemCard";
 
 const ShopPage = () => {
@@ -82,6 +83,9 @@ const ShopPage = () => {
 
   return (
     <Box sx={{ flexGrow: 1, flexWrap: "wrap" }}>
+      <div>
+        <Toaster />
+      </div>
       <Grid container spacing={1}>
         <Grid item xs={4}>
           <Typography> Фильтры </Typography>

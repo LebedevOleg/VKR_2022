@@ -52,4 +52,35 @@ router.get("/getUOrders", auth, async (req, res) => {
     res.status(400).json({ message: e.message });
   }
 });
+
+// */api/orders/getFreeDate
+router.post("/getFreeDate", async (req, res) => {
+  const { items } = req.body;
+  let dates = { startDate: null, endDate: null };
+  for (let i = 0; i < items.length; i++) {
+    await db
+      .query(
+        'SELECT "startDate", "endDate" FROM order_to_equipment inner join orders on "orderId" = orders.id where "eId" = $1',
+        [items[i].id]
+      )
+      .then((res) => {
+        if (res.rowCount !== 0) {
+          for (let y = 0; y < res.rowCount; y++) {
+            if (dates.startDate === null) {
+              dates.startDate = res.rows[y].startDate;
+              dates.endDate = res.rows[y].endDate;
+            } else {
+              if (new Date(dates.startDate) > new Date(res.rows[y].startDate)) {
+                dates.startDate = res.rows[y].startDate;
+              }
+              if (new Date(dates.endDate) < new Date(res.rows[y].endDate)) {
+                dates.endDate = res.rows[y].endDate;
+              }
+            }
+          }
+        }
+      });
+  }
+  res.status(201).json({ ...dates });
+});
 module.exports = router;

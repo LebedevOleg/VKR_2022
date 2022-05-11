@@ -128,9 +128,13 @@ router.get("/getAllCategory", async (req, res) => {
 router.post("/getOptions", async (req, res) => {
   try {
     const { id } = req.body;
-    const options = await db.query(
-      'SELECT id, "oName", "oValueIntA", "oValueIntB", "oValueChar", "eId", "oValueName" FROM options WHERE "eId"=$1 ORDER BY "oName" DESC',
+    const itemName = await db.query(
+      'SELECT "eName" FROM equipment WHERE id = $1',
       [id]
+    );
+    const options = await db.query(
+      'SELECT DISTINCT ON ("oName") "oName", options.id,  "oValueIntA", "oValueIntB", "oValueChar",options."eName", "oValueName"  FROM options INNER JOIN equipment USING ("eName") where options."eName" = $1 ORDER BY "oName" DESC',
+      [itemName.rows[0].eName]
     );
     if (options.rowCount === 0) {
       return res.status(201).json({
@@ -147,9 +151,13 @@ router.post("/getOptions", async (req, res) => {
 router.post("/getOptionsSort", async (req, res) => {
   try {
     const { id } = req.body;
-    const options = await db.query(
-      'SELECT id, "oName", "oValueIntA", "oValueIntB", "oValueChar", "eId", "oValueName" FROM options WHERE "eId"=$1 order by "oName" ASC',
+    const itemName = await db.query(
+      'SELECT "eName" FROM equipment WHERE id = $1',
       [id]
+    );
+    const options = await db.query(
+      'SELECT DISTINCT ON ("oName") "oName", options.id,  "oValueIntA", "oValueIntB", "oValueChar",options."eName", "oValueName"  FROM options INNER JOIN equipment USING ("eName") where options."eName" = $1 ORDER BY "oName" ASC',
+      [itemName.rows[0].eName]
     );
     if (options.rowCount === 0) {
       return res.status(201).json({
@@ -248,18 +256,132 @@ router.post("/updateOptions", async (req, res) => {
 // */api/item/addItem
 router.post("/addItem", async (req, res) => {
   try {
-    const { category, name, price, description, priceForHour, number } =
-      req.body;
+    const {
+      category,
+      name,
+      price,
+      description,
+      priceForHour,
+      number,
+      options,
+    } = req.body;
     for (let i = 0; i < number; i++) {
       await db.query(
         'INSERT INTO equipment( "eName", "ePrice", "eDescription", "eCategory", "priceForHour")	VALUES ( $1, $2, $3, $4, $5)',
         [category + " " + name, price, description, category, priceForHour]
       );
     }
-    res.status(201).json({ item: item.rows[0] });
+    options.map(async (option) => {
+      await db.query(
+        'INSERT INTO options( "oName", "oValueChar", "eName", "oValueName", "oValueIntA", "oValueIntB") VALUES ( $1, $2, $3, $4, $5, $6)',
+        [
+          option[1].oName,
+          option[1].oValueChar,
+          category + " " + name,
+          option[1].oValueName,
+          Number(option[1].oValueIntA),
+          Number(option[1].oValueIntB),
+        ]
+      );
+    });
+    res.status(201).json({ status: "OK" });
   } catch (e) {
     res.status(400).json({ message: e.message });
   }
+});
+
+// */api/item/getImage
+router.post("/getImage", async (req, res) => {
+  const { id } = req.body;
+  const itemName = await db.query(
+    'SELECT "eName" FROM equipment WHERE id = $1',
+    [id]
+  );
+  const image = await db.query(
+    'SELECT "fileName" FROM equip_image WHERE "eName" = $1',
+    [itemName.rows[0].eName]
+  );
+  if (image.rowCount === 0) {
+    return res.status.json({
+      status: "not",
+      image:
+        "https://www.google.com/url?sa=i&url=https%3A%2F%2Ficons8.cn%2Ficon%2FujQ2TKdWp5vZ%2Fempty-box&psig=AOvVaw2b_J1G_Tg8yVymwM5Kc4CQ&ust=1652359985085000&source=images&cd=vfe&ved=0CAwQjRxqFwoTCKCHoeq-1_cCFQAAAAAdAAAAABAJ",
+    });
+  }
+  res.status(201).json({ status: "ok", image: image.rows });
+});
+
+// */api/item/getAllItems
+router.get("/getAllItems", async (req, res) => {
+  const items = await db.query(
+    'SELECT equipment.id, "eName", "ePrice", "eDescription", "eCategory", "pId", date_change, "priceForHour", "eUsed", place."pIat", place."pIon" FROM equipment left join place on "pId" = place.id order by equipment.id asc'
+  );
+  res.status(201).json({ items: items.rows });
+});
+
+// */api/item/findFreeItem
+router.post("/findFreeItem", async (req, res) => {
+  const { ids } = req.body;
+  let freeID = new Map();
+  const itemName = await db.query(
+    'SELECT "eName" FROM equipment WHERE id = $1',
+    [Number(ids[0])]
+  );
+  const AllID = await db.query('SELECT id FROM equipment where "eName" =$1', [
+    itemName.rows[0].eName,
+  ]);
+  for (let i = 0; i < AllID.rowCount; i++) {
+    if (!ids.includes(AllID.rows[i].id.toString())) {
+      console.log(!ids.includes(AllID.rows[i].id.toString()), AllID.rows[i].id);
+      freeID.set("next", AllID.rows[i].id);
+    }
+  }
+  if (freeID.has("next")) {
+    res.status(201).json({ nextID: [...freeID] });
+  } else {
+    res.status(201).json({ nextID: 0 });
+  }
+});
+
+// */api/item/ChangeStatus
+router.post("/ChangeStatus", async (req, res) => {
+  const { status, id } = req.body;
+  const lastStatus = await db.query(
+    'SELECT "pId" FROM equipment where id = $1 ',
+    [id]
+  );
+  console.log(lastStatus.rows[0]);
+
+  if (status === 0 && lastStatus.rows[0].pId === null) {
+    await db.query('UPDATE equipment	SET "pId"=$1, date_change=$2	WHERE id =$3', [
+      0,
+      new Date().toISOString(),
+      id,
+    ]);
+  } else if (status === null) {
+    await db.query('UPDATE equipment	SET "pId"=$1, date_change=$2	WHERE id =$3', [
+      ,
+      new Date().toISOString(),
+      id,
+    ]);
+  } else if (status === 1 && lastStatus.rows[0].pId === null) {
+    const eqOrder = await db.query(
+      'SELECT "startDate", "endDate" FROM order_to_equipment inner join orders on "orderId" = orders.id where "eId" = $1 order by "startDate"',
+      [id]
+    );
+    if (eqOrder.rowCount !== 0) {
+      for (let i = 0; i < eqOrder.rowCount; i++) {
+        if (new Date(Date.now()) > new Date(eqOrder.rows[i].startDate)) {
+          await db.query(
+            'UPDATE equipment	SET "pId"=$1, date_change=$2	WHERE id =$3',
+            [eqOrder.rows[i].pId, new Date().toISOString(), id]
+          );
+          break;
+        }
+      }
+    }
+  }
+  res.status(201).json({ message: "OK" });
 });
 
 module.exports = router;

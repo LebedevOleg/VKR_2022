@@ -29,9 +29,10 @@ export function CreateOrderModal(data) {
   const token = "2256f7337a24297300f30f6c84e4990efb76ddd6";
   const secret = "76249429c44e0cad78ead8fcf0e3896d85fa72c6";
   const [openSign, setOpenSign] = useState(false);
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [dateComplite, setDateComplite] = useState(true);
+  const [blockDate, setBlockDate] = useState([null, null]);
   const [complite, setComplite] = useState(true);
   const auth = useContext(AuthContext);
   const [addres, setAddres] = useState({
@@ -52,7 +53,12 @@ export function CreateOrderModal(data) {
     });
   }
 
-  const handleClickOpen = () => {
+  const handleClickOpen = async () => {
+    await axios
+      .post("/api/orders/getFreeDate", { items: data.items })
+      .then((res) => {
+        setBlockDate([res.data.startDate, res.data.endDate]);
+      });
     setOpenSign(true);
   };
   const handleClickClose = () => {
@@ -132,8 +138,17 @@ export function CreateOrderModal(data) {
                 selectsStart
                 showTimeSelect
                 timeFormat="HH:mm"
-                minTime={setHours(setMinutes(new Date(), 0), 6)}
+                minTime={setHours(setMinutes(new Date(Date.now()), 0), 6)}
                 maxTime={setHours(setMinutes(new Date(), 0), 23)}
+                excludeDateIntervals={
+                  blockDate[0] !== null && [
+                    {
+                      start: new Date(blockDate[0]),
+                      end: new Date(blockDate[1]),
+                    },
+                  ]
+                }
+                minDate={new Date()}
                 startDate={startDate}
                 endDate={endDate}
                 dateFormat="dd-MM-yyyy HH:mm"
@@ -141,6 +156,7 @@ export function CreateOrderModal(data) {
             </Box>
             <Box>
               {(endDate !== null &&
+                startDate !== null &&
                 startDate.getDate() === endDate.getDate() &&
                 startDate.getMonth() === endDate.getMonth() &&
                 startDate.getFullYear() === endDate.getFullYear() && (
@@ -151,6 +167,14 @@ export function CreateOrderModal(data) {
                     }}
                     selectsEnd
                     showTimeSelect
+                    excludeDateIntervals={
+                      blockDate[0] !== null && [
+                        {
+                          start: new Date(blockDate[0]),
+                          end: new Date(blockDate[1]),
+                        },
+                      ]
+                    }
                     minTime={setHours(
                       setMinutes(startDate, startDate.getMinutes()),
                       startDate.getHours()
@@ -159,7 +183,7 @@ export function CreateOrderModal(data) {
                     timeFormat="HH:mm"
                     startDate={startDate}
                     endDate={endDate}
-                    minDate={startDate}
+                    minDate={new Date()}
                     dateFormat="dd-MM-yyyy HH:mm"
                   />
                 )) || (
@@ -169,13 +193,21 @@ export function CreateOrderModal(data) {
                     setEndDate(date);
                   }}
                   selectsEnd
+                  excludeDateIntervals={
+                    blockDate[0] !== null && [
+                      {
+                        start: new Date(blockDate[0]),
+                        end: new Date(blockDate[1]),
+                      },
+                    ]
+                  }
                   showTimeSelect
                   minTime={setHours(setMinutes(new Date(), 0), 6)}
                   maxTime={setHours(setMinutes(new Date(), 0), 23)}
                   timeFormat="HH:mm"
                   startDate={startDate}
                   endDate={endDate}
-                  minDate={startDate}
+                  minDate={new Date()}
                   dateFormat="dd-MM-yyyy, HH:mm"
                 />
               )}
@@ -206,7 +238,10 @@ export function CreateOrderModal(data) {
                 console.log(dateComplite);
               }}
               disabled={
-                !endDate || systemAddres === "" || systemAddres === null
+                !endDate ||
+                systemAddres === "" ||
+                systemAddres === null ||
+                !startDate
               }
             >
               Подтвердить время и место

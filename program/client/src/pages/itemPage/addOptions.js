@@ -49,8 +49,8 @@ const AddOptions = () => {
 
   const handleChangeOptions = (event) => {
     let tempStruct;
-    if (optionsMap.has(event.target.name)) {
-      tempStruct = optionsMap.get(event.target.name);
+    if (optionsMap.has(event.target.name.split(":")[0])) {
+      tempStruct = optionsMap.get(event.target.name.split(":")[0]);
     } else {
       tempStruct = {
         oName: null,

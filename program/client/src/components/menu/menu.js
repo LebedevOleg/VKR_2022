@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -11,7 +17,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import { Button } from "@mui/material";
+import { Badge, Button } from "@mui/material";
 import SignModal from "../SignModal/sign.modal";
 import { useAuth } from "../../hooks/auth.hook";
 import { AuthContext } from "../../context/authContext";
@@ -93,7 +99,9 @@ const NavBar = () => {
                 window.location = "/shoplist";
               }}
             >
-              <ShoppingCartIcon />
+              <Fragment>
+                <ShoppingCartIcon />
+              </Fragment>
             </IconButton>
             {(!!token && (
               <Typography>
