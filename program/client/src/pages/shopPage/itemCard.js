@@ -28,6 +28,9 @@ const ItemCard = (data) => {
             if (res.data.nextID !== 0) {
               cartArray.push(res.data.nextID[0][1]);
               localStorage.setItem("cart", cartArray);
+              toast.success("Товар добавлен в карзину", {
+                position: "bottom-left",
+              });
             } else {
               setDisable(true);
               toast.error("Данный товар закончился!", {
@@ -38,10 +41,16 @@ const ItemCard = (data) => {
       } else {
         cartArray.push(Number(data.item.id));
         localStorage.setItem("cart", cartArray);
+        toast.success("Товар добавлен в карзину", {
+          position: "bottom-left",
+        });
       }
     } else {
       cartArray.push(Number(data.item.id));
       localStorage.setItem("cart", cartArray);
+      toast.success("Товар добавлен в карзину", {
+        position: "bottom-left",
+      });
     }
   };
 

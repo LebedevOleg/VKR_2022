@@ -25,7 +25,7 @@ const ShopPage = () => {
   const [price, setPrice] = useState([0.0, 100.0]);
   const [category, setCategory] = useState("");
   const [filterForm, setFilterForm] = useState({
-    price: [0.0, 5000.0],
+    price: [0.0, 50000.0],
     category: "all",
   });
 
@@ -47,10 +47,10 @@ const ShopPage = () => {
     } else {
       setPrice([price[0], Math.max(newValue[1], price[0] + minDistance)]);
     }
-    setFilterForm({ ...filterForm, price: [price[0] * 50, price[1] * 50] });
+    setFilterForm({ ...filterForm, price: [price[0] * 500, price[1] * 500] });
   };
   const calculatePriceFilter = (value) => {
-    return value * 50;
+    return value * 500;
   };
   //#endregion
 
@@ -104,7 +104,7 @@ const ShopPage = () => {
               <TextField
                 size="small"
                 variant="standard"
-                value={price[0] * 50}
+                value={price[0] * 500}
                 disabled
               ></TextField>
               <Slider
@@ -122,7 +122,7 @@ const ShopPage = () => {
               <TextField
                 variant="standard"
                 size="small"
-                value={price[1] * 50}
+                value={price[1] * 500}
                 disabled
               ></TextField>
             </Box>

@@ -5,11 +5,13 @@ import {
   Button,
   Card,
   Divider,
+  Fade,
   FormControl,
   Grid,
   IconButton,
   Input,
   Popover,
+  Popper,
   Stack,
   Tab,
   Table,
@@ -28,6 +30,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { AuthContext } from "../../context/authContext";
@@ -88,10 +91,11 @@ const AccauntPage = () => {
   const handleOpenMap = (event) => {
     setOpenMap(event.currentTarget);
   };
+  const popperID = map ? "simple-popper" : undefined;
   const handleCloseMap = () => {
     setOpenMap(null);
   };
-
+  const maps = useRef(null);
   //#endregion
 
   const [orders, setOrders] = useState(null);
@@ -276,7 +280,9 @@ const AccauntPage = () => {
                     <TableBody key={order.id}>
                       <TableCell align="center">{order.id}</TableCell>
                       <TableCell
-                        aria-owns={map ? "mouse-over-popover" : undefined}
+                        key={order.id}
+                        align="center"
+                        aria-describedby={popperID}
                         aria-haspopup="true"
                         onMouseEnter={handleOpenMap}
                         onMouseLeave={handleCloseMap}
@@ -284,23 +290,10 @@ const AccauntPage = () => {
                         <Typography align="center">
                           {address[orders.indexOf(order)].address}
                         </Typography>
-                        <Popover
-                          id="mouse-over-popover"
-                          open={map}
-                          anchorEl={openMap}
-                          anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "left",
-                          }}
-                          transformOrigin={{
-                            vertical: "top",
-                            horizontal: "left",
-                          }}
-                          onClose={handleCloseMap}
-                          disableRestoreFocus
-                        >
+                        <Box sx={{ display: "flex" }}>
                           <YMaps>
                             <Map
+                              instanceRef={maps}
                               defaultState={{
                                 center: [
                                   address[orders.indexOf(order)].lat,
@@ -317,7 +310,7 @@ const AccauntPage = () => {
                               />
                             </Map>
                           </YMaps>
-                        </Popover>
+                        </Box>
                       </TableCell>
                       <TableCell align="center">
                         <DatePicker

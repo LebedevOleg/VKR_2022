@@ -294,15 +294,15 @@ router.post("/addItem", async (req, res) => {
 router.post("/getImage", async (req, res) => {
   const { id } = req.body;
   const itemName = await db.query(
-    'SELECT "eName" FROM equipment WHERE id = $1',
+    'SELECT "eName", "eCategory" FROM equipment WHERE id = $1',
     [id]
   );
   const image = await db.query(
     'SELECT "fileName" FROM equip_image WHERE "eName" = $1',
-    [itemName.rows[0].eName]
+    [itemName.rows[0].eName.slice(itemName.rows[0].eCategory.length + 1)]
   );
   if (image.rowCount === 0) {
-    return res.status.json({
+    return res.status(201).json({
       status: "not",
       image:
         "https://www.google.com/url?sa=i&url=https%3A%2F%2Ficons8.cn%2Ficon%2FujQ2TKdWp5vZ%2Fempty-box&psig=AOvVaw2b_J1G_Tg8yVymwM5Kc4CQ&ust=1652359985085000&source=images&cd=vfe&ved=0CAwQjRxqFwoTCKCHoeq-1_cCFQAAAAAdAAAAABAJ",

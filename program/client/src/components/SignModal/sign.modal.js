@@ -17,6 +17,7 @@ import TabPanel from "@mui/lab/TabPanel";
 import React, { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../context/authContext";
+import toast, { Toaster } from "react-hot-toast";
 
 const SignModal = () => {
   const [openSign, setOpenSign] = useState(false);
@@ -33,12 +34,23 @@ const SignModal = () => {
 
   const loginFunc = async () => {
     try {
-      await axios.post("/api/sign/login", { ...formLogin }).then((res) => {
-        console.log(res.data);
-        auth.login(res.data.token, res.data.userId);
-      });
-      window.location = "/account";
-    } catch (e) {}
+      await axios
+        .post("/api/sign/login", { ...formLogin })
+        .then((res) => {
+          console.log(res.data);
+          auth.login(res.data.token, res.data.userId);
+          window.location = "/account";
+        })
+        .catch((error) => {
+          if (error.request) {
+            toast.error(error.response.data.message, {
+              position: "bottom-left",
+            });
+          }
+        });
+    } catch (e) {
+      toast.error(e.message, { position: "bottom-left" });
+    }
   };
 
   const regFunc = async () => {
@@ -69,6 +81,9 @@ const SignModal = () => {
   //#endregion
   return (
     <div>
+      <div>
+        <Toaster />
+      </div>
       <Button color="inherit" onClick={handleClickOpen}>
         Войти/Зарегестрироваться
       </Button>

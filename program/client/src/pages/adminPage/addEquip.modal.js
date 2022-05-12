@@ -65,7 +65,12 @@ const AddEquipModal = () => {
     optionsMap.clear();
   };
   const handleNext = () => {
-    const newActiveStep = activeStep + 1;
+    let newActiveStep;
+    if (activeStep != 1) {
+      newActiveStep = activeStep + 1;
+    } else {
+      newActiveStep = 0;
+    }
     setActiveStep(newActiveStep);
   };
   const handleComplete = () => {
@@ -78,19 +83,14 @@ const AddEquipModal = () => {
   const [url, setUrl] = useState("");
 
   const handleSaveEquip = async () => {
-    await axios
-      .post("/api/item/addItem", {
-        ...formEquip,
-        options: [...optionsMap],
-      })
-      .then((res) => {
-        toast.success("Фото успешно загружено, можете загрузить еще", {
-          position: "bottom-left",
-        });
-      });
+    await axios.post("/api/item/addItem", {
+      ...formEquip,
+      options: [...optionsMap],
+    });
     const newCompleted = completed;
     newCompleted[activeStep] = true;
     setCompleted(newCompleted);
+    handleNext();
   };
 
   const handleChangeForm = (event) => {
@@ -107,10 +107,16 @@ const AddEquipModal = () => {
   };
 
   const handleDownloadImage = async (event) => {
-    await axios.post("api/pars/downloadImage", {
-      url: url,
-      fileName: formEquip.name,
-    });
+    await axios
+      .post("api/pars/downloadImage", {
+        url: url,
+        fileName: formEquip.name,
+      })
+      .then((res) => {
+        toast.success("Фото успешно загружено, можете загрузить еще", {
+          position: "bottom-left",
+        });
+      });
   };
 
   const handleClickOpen = () => {
@@ -157,6 +163,7 @@ const AddEquipModal = () => {
       <Button color="info" onClick={handleClickOpen} variant="contained">
         Добавить оборудование
       </Button>
+
       <Dialog
         open={open}
         onClose={handleClickClose}

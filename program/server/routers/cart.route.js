@@ -56,8 +56,13 @@ router.post("/saveOrder", auth, async (req, res) => {
     );
     items.map(async (item) => {
       db.query(
-        'INSERT INTO order_to_equipment("eId", "orderId") VALUES ( $1, $2)',
-        [item.id, newOrder.rows[0].id]
+        'INSERT INTO order_to_equipment("eId", "orderId", "price") VALUES ( $1, $2,$3)',
+        [
+          item.id,
+          newOrder.rows[0].id,
+          (item.priceForHour * (new Date(endDate) - new Date(startDate))) /
+            (1000 * 60 * 60),
+        ]
       );
     });
     res.status(201).json({ message: "complite add" });

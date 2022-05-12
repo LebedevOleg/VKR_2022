@@ -7,6 +7,7 @@ const itemRouter = require("./routers/item.route");
 const cartRouter = require("./routers/cart.route");
 const parseRouter = require("./routers/parse.route");
 const ordersRouter = require("./routers/orders.route");
+const statisticRouter = require("./routers/statisic.route");
 //#endregion
 
 const app = express();
@@ -21,5 +22,6 @@ app.use("/api/item", itemRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/pars", parseRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/stat", statisticRouter);
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

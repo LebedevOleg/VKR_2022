@@ -76,6 +76,8 @@ router.post("/downloadImage", async (req, res) => {
       'select * from equip_image where "eName" = $1',
       [fileName]
     );
+    let lof = "";
+    lof.replaceAll();
     request.head(url, function (err, res, body) {
       console.log("content-type:", res.headers["content-type"]);
       console.log("content-length:", res.headers["content-length"]);
@@ -83,7 +85,7 @@ router.post("/downloadImage", async (req, res) => {
         fs.createWriteStream(
           appDir +
             "/db/" +
-            fileName.replace(" ", "_") +
+            fileName.replaceAll(" ", "_") +
             "_" +
             count.rowCount +
             ".png"
@@ -92,8 +94,9 @@ router.post("/downloadImage", async (req, res) => {
     });
     await db.query(
       'INSERT INTO public.equip_image(	"fileName", "eName")	VALUES ( $1, $2)',
-      [fileName.replace(" ", "_") + "_" + count.rowCount + ".png", fileName]
+      [fileName.replaceAll(" ", "_") + "_" + count.rowCount + ".png", fileName]
     );
+    res.status(201).json({ message: "OK" });
   } catch (e) {
     res.status(401).json({ message: e.message });
   }
