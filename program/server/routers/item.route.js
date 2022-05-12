@@ -350,8 +350,6 @@ router.post("/ChangeStatus", async (req, res) => {
     'SELECT "pId" FROM equipment where id = $1 ',
     [id]
   );
-  console.log(lastStatus.rows[0]);
-
   if (status === 0 && lastStatus.rows[0].pId === null) {
     await db.query('UPDATE equipment	SET "pId"=$1, date_change=$2	WHERE id =$3', [
       0,
@@ -359,23 +357,47 @@ router.post("/ChangeStatus", async (req, res) => {
       id,
     ]);
   } else if (status === null) {
-    await db.query('UPDATE equipment	SET "pId"=$1, date_change=$2	WHERE id =$3', [
-      ,
-      new Date().toISOString(),
-      id,
-    ]);
+    if (lastStatus.rows[0].pId !== 0 && lastStatus.rows[0].pId !== null) {
+      const eqOrder = await db.query(
+        'SELECT "startDate", "endDate", "pId" FROM order_to_equipment inner join orders on "orderId" = orders.id where "eId" = $1 order by "startDate"',
+        [id]
+      );
+      for (let i = 0; i < eqOrder.rowCount; i++) {
+        if (new Date() < new Date(eqOrder.rows[i].endDate)) {
+          return res.status(201).json({ message: "alert" });
+        } else {
+          await db.query(
+            'UPDATE equipment	SET "pId"=$1, date_change=$2	WHERE id =$3',
+            [, new Date().toISOString(), id]
+          );
+          await db.query('UPDATE place SET "dateOut"=$1 WHERE id=$2', [
+            new Date().toISOString(),
+            eqOrder.rows[i].pId,
+          ]);
+        }
+      }
+    } else {
+      await db.query(
+        'UPDATE equipment	SET "pId"=$1, date_change=$2	WHERE id =$3',
+        [, new Date().toISOString(), id]
+      );
+    }
   } else if (status === 1 && lastStatus.rows[0].pId === null) {
     const eqOrder = await db.query(
-      'SELECT "startDate", "endDate" FROM order_to_equipment inner join orders on "orderId" = orders.id where "eId" = $1 order by "startDate"',
+      'SELECT "startDate", "endDate", "pId" FROM order_to_equipment inner join orders on "orderId" = orders.id where "eId" = $1 order by "startDate"',
       [id]
     );
     if (eqOrder.rowCount !== 0) {
       for (let i = 0; i < eqOrder.rowCount; i++) {
-        if (new Date(Date.now()) > new Date(eqOrder.rows[i].startDate)) {
+        if (new Date() > new Date(eqOrder.rows[i].startDate)) {
           await db.query(
             'UPDATE equipment	SET "pId"=$1, date_change=$2	WHERE id =$3',
             [eqOrder.rows[i].pId, new Date().toISOString(), id]
           );
+          await db.query('UPDATE place SET "dateOn"=$1 WHERE id=$2', [
+            new Date().toISOString(),
+            eqOrder.rows[i].pId,
+          ]);
           break;
         }
       }

@@ -54,6 +54,15 @@ const AddEquipModal = () => {
   const handleReset = () => {
     setActiveStep(0);
     setCompleted({});
+    setFormEquip({
+      category: "",
+      name: "",
+      price: 0,
+      description: null,
+      priceForHour: 0,
+      number: 1,
+    });
+    optionsMap.clear();
   };
   const handleNext = () => {
     const newActiveStep = activeStep + 1;
@@ -69,8 +78,7 @@ const AddEquipModal = () => {
   const [url, setUrl] = useState("");
 
   const handleSaveEquip = async () => {
-    console.log(optionsMap);
-    /*  await axios
+    await axios
       .post("/api/item/addItem", {
         ...formEquip,
         options: [...optionsMap],
@@ -79,7 +87,10 @@ const AddEquipModal = () => {
         toast.success("Фото успешно загружено, можете загрузить еще", {
           position: "bottom-left",
         });
-      }); */
+      });
+    const newCompleted = completed;
+    newCompleted[activeStep] = true;
+    setCompleted(newCompleted);
   };
 
   const handleChangeForm = (event) => {
