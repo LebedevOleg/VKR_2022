@@ -94,7 +94,7 @@ router.post("/getSoldForYear", async (req, res) => {
         "ноябрь",
         "декабрь",
       ];
-      let days = new Date(year, months.indexOf(month), 0).getDate();
+      let days = new Date(year, months.indexOf(month) + 1, 0).getDate();
       console.log(days);
       for (let i = 1; i <= days; i++) {
         monthElem.set(i.toString(), 0);
@@ -110,7 +110,7 @@ router.post("/getSoldForYear", async (req, res) => {
             console.log(
               (new Date(allSold.rows[i].endDate) -
                 new Date(allSold.rows[i].startDate)) /
-                (24 * 60 * 60 * 1000)
+                (1000 * 60 * 60 * 24)
             );
             value +=
               (allSold.rows[i].price * (60 * 60 * 1000 * 24)) /
