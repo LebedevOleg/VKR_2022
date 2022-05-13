@@ -11,7 +11,8 @@ const router = new Router();
 //* /api/stat/getSoldForYear
 router.post("/getSoldForYear", async (req, res) => {
   try {
-    const { eName } = req.body;
+    const { eName, year, month } = req.body;
+
     const allSold = await db.query(
       'SELECT "eId", "orderId","price", orders."priceAll",orders."startDate",orders."endDate","eName" FROM public.order_to_equipment inner join orders on "orderId" = orders.id inner join equipment on "eId" = equipment.id where "eName"=$1 order by "startDate" ASC',
       [eName]
@@ -42,35 +43,87 @@ router.post("/getSoldForYear", async (req, res) => {
     ]);
 
     for (let i = 0; i < allSold.rowCount; i++) {
-      if (
-        elements.has(
-          allSold.rows[i].startDate.toLocaleString("default", { month: "long" })
-        )
-      ) {
-        let temp = elements.get(
-          allSold.rows[i].startDate.toLocaleString("default", { month: "long" })
-        );
-        temp += allSold.rows[i].price;
-        elements.set(
-          allSold.rows[i].startDate.toLocaleString("default", {
-            month: "long",
-          }),
-          temp
-        );
-      } else {
-        elements.set(
-          allSold.rows[i].startDate.toLocaleString("default", {
-            month: "long",
-          }),
-          allSold.rows[i].price
-        );
+      if (new Date(allSold.rows[i].startDate).getFullYear() === Number(year)) {
+        if (
+          elements.has(
+            allSold.rows[i].startDate.toLocaleString("default", {
+              month: "long",
+            })
+          )
+        ) {
+          let temp = elements.get(
+            allSold.rows[i].startDate.toLocaleString("default", {
+              month: "long",
+            })
+          );
+          temp += allSold.rows[i].price;
+          elements.set(
+            allSold.rows[i].startDate.toLocaleString("default", {
+              month: "long",
+            }),
+            temp
+          );
+        } else {
+          elements.set(
+            allSold.rows[i].startDate.toLocaleString("default", {
+              month: "long",
+            }),
+            allSold.rows[i].price
+          );
+        }
       }
     }
     const parseToJson = (value, key) => {
       result.push({ name: key, value: value });
     };
     elements.forEach(parseToJson);
-    console.log(result);
+    const monthRes = [];
+    if (month !== undefined) {
+      const monthElem = new Map();
+      var months = [
+        "январь",
+        "февраль",
+        "март",
+        "апрель",
+        "май",
+        "июнь",
+        "июль",
+        "август",
+        "сентябрь",
+        "отктябрь",
+        "ноябрь",
+        "декабрь",
+      ];
+      let days = new Date(year, months.indexOf(month), 0).getDate();
+      console.log(days);
+      for (let i = 1; i <= days; i++) {
+        monthElem.set(i.toString(), 0);
+      }
+      const compliteDate = (value, key) => {
+        for (let i = 0; i < allSold.rowCount; i++) {
+          if (
+            months.indexOf(month) ===
+              new Date(allSold.rows[i].startDate).getMonth() &&
+            Number(key) >= new Date(allSold.rows[i].startDate).getDate() &&
+            Number(key) <= new Date(allSold.rows[i].endDate).getDate()
+          ) {
+            console.log(
+              (new Date(allSold.rows[i].endDate) -
+                new Date(allSold.rows[i].startDate)) /
+                (24 * 60 * 60 * 1000)
+            );
+            value +=
+              (allSold.rows[i].price * (60 * 60 * 1000 * 24)) /
+              (new Date(allSold.rows[i].endDate) -
+                new Date(allSold.rows[i].startDate));
+          }
+        }
+
+        monthRes.push({ name: key, value: value });
+      };
+      monthElem.forEach(compliteDate);
+      return res.status(201).json({ data: result, month: monthRes });
+    }
     res.status(201).json({ data: result });
   } catch (e) {
     res.status(401).json({ message: e.message });
@@ -114,6 +167,59 @@ router.post("/GetCategoryStat", async (req, res) => {
   };
   elements.forEach(parseToJson);
   res.status(201).json({ data: result });
+});
+
+//* /api/stat/getMonth
+router.get("/getMonth", async (req, res) => {
+  const years = await db.query('SELECT "startDate", "endDate" FROM orders');
+  if (years.rowCount === 0) {
+    return res.status(201).json({ years: 2022 });
+  }
+  const result = [];
+  const element = new Map();
+
+  for (let i = 0; i < years.rowCount; i++) {
+    if (
+      !element.has(
+        new Date(years.rows[i].startDate).toLocaleString("default", {
+          month: "long",
+        })
+      )
+    ) {
+      element.set(
+        new Date(years.rows[i].startDate).toLocaleString("default", {
+          month: "long",
+        }),
+        new Date(years.rows[i].startDate).toLocaleString("default", {
+          month: "long",
+        })
+      );
+    }
+  }
+  const parseToJson = (value) => result.push(value);
+  element.forEach(parseToJson);
+  res.status(201).json({ month: result });
+});
+//* /api/stat/getYears
+router.get("/getYears", async (req, res) => {
+  const years = await db.query('SELECT "startDate", "endDate" FROM orders');
+  if (years.rowCount === 0) {
+    return res.status(201).json({ years: 2022 });
+  }
+  const result = [];
+  const element = new Map();
+
+  for (let i = 0; i < years.rowCount; i++) {
+    if (!element.has(new Date(years.rows[i].startDate).getFullYear())) {
+      element.set(
+        new Date(years.rows[i].startDate).getFullYear(),
+        new Date(years.rows[i].startDate).getFullYear()
+      );
+    }
+  }
+  const parseToJson = (value) => result.push(value);
+  element.forEach(parseToJson);
+  res.status(201).json({ years: result });
 });
 
 module.exports = router;
