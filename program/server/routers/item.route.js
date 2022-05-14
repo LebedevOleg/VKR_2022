@@ -173,20 +173,24 @@ router.post("/getOptionsSort", async (req, res) => {
 // */api/item/updateOptions
 router.post("/updateOptions", async (req, res) => {
   const { options, id } = req.body;
+  const itemName = await db.query(
+    'SELECT "eName", "eCategory" FROM equipment WHERE id = $1',
+    [id]
+  );
   options.map(async (option) => {
     //!option[0] - имя option, [1] - параметры
     const check = await db.query(
-      'SELECT id, "oValueIntA", "oValueIntB" FROM options WHERE "oName" = $1 and "eId" =$2',
-      [option[0], id]
+      'SELECT id, "oValueIntA", "oValueIntB" FROM options WHERE "oName" = $1 and "eName" =$2',
+      [option[0], itemName.rows[0].eName]
     );
     console.log(check.rowCount, check.rows);
     if (check.rowCount === 0) {
       await db.query(
-        'INSERT INTO options( "oName", "oValueChar", "eId", "oValueName", "oValueIntA", "oValueIntB") VALUES ( $1, $2, $3, $4, $5, $6)',
+        'INSERT INTO options( "oName", "oValueChar", "eName", "oValueName", "oValueIntA", "oValueIntB") VALUES ( $1, $2, $3, $4, $5, $6)',
         [
           option[1].oName,
           option[1].oValueChar,
-          option[1].eId,
+          itemName.rows[0].eName,
           option[1].oValueName,
           Number(option[1].oValueIntA),
           Number(option[1].oValueIntB),
@@ -195,11 +199,11 @@ router.post("/updateOptions", async (req, res) => {
     } else {
       if (option[1].oValueIntA === null && option[1].oValueIntB === null) {
         await db.query(
-          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eId"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eId"=$3',
+          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
           [
             option[1].oName,
             option[1].oValueChar,
-            option[1].eId,
+            itemName.rows[0].eName,
             option[1].oValueName,
             Number(check.rows[0].oValueIntA),
             Number(check.rows[0].oValueIntB),
@@ -210,11 +214,11 @@ router.post("/updateOptions", async (req, res) => {
         option[1].oValueIntB !== null
       ) {
         await db.query(
-          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eId"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eId"=$3',
+          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
           [
             option[1].oName,
             option[1].oValueChar,
-            option[1].eId,
+            itemName.rows[0].eName,
             option[1].oValueName,
             Number(check.rows[0].oValueIntA),
             Number(option[1].oValueIntB),
@@ -225,11 +229,11 @@ router.post("/updateOptions", async (req, res) => {
         option[1].oValueIntB === null
       ) {
         await db.query(
-          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eId"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eId"=$3',
+          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
           [
             option[1].oName,
             option[1].oValueChar,
-            option[1].eId,
+            itemName.rows[0].eName,
             option[1].oValueName,
             Number(option[1].oValueIntA),
             Number(check.rows[0].oValueIntB),
@@ -237,11 +241,11 @@ router.post("/updateOptions", async (req, res) => {
         );
       } else {
         await db.query(
-          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eId"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eId"=$3',
+          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
           [
             option[1].oName,
             option[1].oValueChar,
-            option[1].eId,
+            itemName.rows[0].eName,
             option[1].oValueName,
             Number(option[1].oValueIntA),
             Number(option[1].oValueIntB),

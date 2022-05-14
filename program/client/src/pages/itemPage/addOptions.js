@@ -280,6 +280,571 @@ const AddOptions = () => {
             </>
           );
           break;
+        case "Акустические системы активные":
+          return (
+            <>
+              <Typography variant="h3" sx={{ mt: 2, ml: 3 }}>
+                Изменеие характеристик
+              </Typography>
+              <Stack
+                spacing={1}
+                divider={<Divider orientation="horizontal" />}
+                sx={{ ml: 1, mr: "15%" }}
+              >
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Частотный диапозон:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Частотный диапозон:Гц"
+                      id="oValueIntA"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[7].oValueIntA) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите минимальное хначение"
+                    />
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Частотный диапозон:Гц"
+                      id="oValueIntB"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[7].oValueIntB) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите максимальное значение"
+                    />
+                    Гц
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Максимальная Выходная мощность:
+                    <TextField
+                      sx={{
+                        ml: 1,
+                        width: "300px",
+                        maxWidth: "400px",
+                        minWidth: "150px",
+                      }}
+                      name="Выходная мощность:Вт"
+                      className="Вт"
+                      id="oValueIntA"
+                      size="small"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[3].oValueIntA) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите выходную мощность"
+                    />
+                    Вт
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Входы/Выходы:
+                    <TextField
+                      sx={{
+                        ml: 1,
+                        width: "300px",
+                        maxWidth: "400px",
+                        minWidth: "150px",
+                      }}
+                      name="Входы/Выходы:"
+                      id="oValueChar"
+                      size="small"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[2].oValueChar) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Перечислите разъемы через запятую"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Габариты (Ширина/Высота/Глубина):
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Габариты (Ширина/Высота/Глубина):"
+                      id="oValueChar"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[4].oValueChar) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите габариты объекта"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Питание:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Питание:"
+                      id="oValueChar"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[6].oValueChar) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите требования к питанию"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Габариты в заводской упаковке:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Габариты в заводской упаковке:"
+                      id="oValueChar"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите габариты объекта в упаковке"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[5].oValueChar) ||
+                        ""
+                      }
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Вес без упаковки:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Вес без упаковки:Кг"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[0].oValueIntA) ||
+                        ""
+                      }
+                      placeholder="Введите вес объекта без упаковки"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Вес в упаковке:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Вес в упаковке:Кг"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[1].oValueIntA) ||
+                        ""
+                      }
+                      placeholder="Введите вес объекта с упаковкой"
+                    />
+                  </Typography>
+                </Box>
+              </Stack>
+              <Button sx={{ m: 1 }} onClick={handleSaveOptions}>
+                Сохранить изменения
+              </Button>
+            </>
+          );
+        case "Акустические системы пассивные":
+          return (
+            <>
+              <Typography variant="h3" sx={{ mt: 2, ml: 3 }}>
+                Изменеие характеристик
+              </Typography>
+              <Stack
+                spacing={1}
+                divider={<Divider orientation="horizontal" />}
+                sx={{ ml: 1, mr: "15%" }}
+              >
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Частотный диапозон:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Частотный диапозон:Гц"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[7].oValueIntA) ||
+                        ""
+                      }
+                      placeholder="Введите минимальное хначение"
+                    />
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Частотный диапозон:Гц"
+                      id="oValueIntB"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[7].oValueIntB) ||
+                        ""
+                      }
+                      placeholder="Введите максимальное значение"
+                    />
+                    Гц
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Максимальная Выходная мощность:
+                    <TextField
+                      sx={{
+                        ml: 1,
+                        width: "300px",
+                        maxWidth: "400px",
+                        minWidth: "150px",
+                      }}
+                      name="Выходная мощность:Вт"
+                      className="Вт"
+                      id="oValueIntA"
+                      size="small"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[3].oValueIntA) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите выходную мощность"
+                    />
+                    Вт
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography sx={{ p: 1 }}>
+                    Чувствительность:
+                    <TextField
+                      sx={{
+                        ml: 1,
+                        width: "300px",
+                        maxWidth: "400px",
+                        minWidth: "150px",
+                      }}
+                      name="Чувствительность:Db"
+                      className="Db"
+                      id="oValueIntA"
+                      size="small"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[8].oValueIntA) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите выходную мощность"
+                    />
+                    Db
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography sx={{ p: 1 }}>
+                    Сопротивление:
+                    <TextField
+                      sx={{
+                        ml: 1,
+                        width: "300px",
+                        maxWidth: "400px",
+                        minWidth: "150px",
+                      }}
+                      name="Сопротивление:Ом"
+                      className="Ом"
+                      id="oValueIntA"
+                      size="small"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[6].oValueIntA) ||
+                        ""
+                      }
+                      placeholder="Введите выходную мощность"
+                    />
+                    Ом
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Входы/Выходы:
+                    <TextField
+                      sx={{
+                        ml: 1,
+                        width: "300px",
+                        maxWidth: "400px",
+                        minWidth: "150px",
+                      }}
+                      name="Входы/Выходы:"
+                      id="oValueChar"
+                      size="small"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[2].oValueChar) ||
+                        ""
+                      }
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Перечислите разъемы через запятую"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Габариты (Ширина/Высота/Глубина):
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Габариты (Ширина/Высота/Глубина):"
+                      id="oValueChar"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[4].oValueChar) ||
+                        ""
+                      }
+                      placeholder="Введите габариты объекта"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Габариты в заводской упаковке:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Габариты в заводской упаковке:"
+                      id="oValueChar"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[5].oValueChar) ||
+                        ""
+                      }
+                      placeholder="Введите габариты объекта в упаковке"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Вес без упаковки:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Вес без упаковки:Кг"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[0].oValueIntA) ||
+                        ""
+                      }
+                      placeholder="Введите вес объекта без упаковки"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Вес в упаковке:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Вес в упаковке:Кг"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[1].oValueIntA) ||
+                        ""
+                      }
+                      placeholder="Введите вес объекта с упаковкой"
+                    />
+                  </Typography>
+                </Box>
+              </Stack>
+              <Button sx={{ m: 1 }} onClick={handleSaveOptions}>
+                Сохранить изменения
+              </Button>
+            </>
+          );
+        case "Стойки":
+          return (
+            <>
+              <Typography variant="h3" sx={{ mt: 2, ml: 3 }}>
+                Изменеие характеристик
+              </Typography>
+              <Stack
+                spacing={1}
+                divider={<Divider orientation="horizontal" />}
+                sx={{ ml: 1, mr: "15%" }}
+              >
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Высота:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Высота:мм"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[1].oValueIntA) ||
+                        ""
+                      }
+                      placeholder="Введите минимальное хначение"
+                    />
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Высота:мм"
+                      id="oValueIntB"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[1].oValueIntB) ||
+                        ""
+                      }
+                      placeholder="Введите максимальное значение"
+                    />
+                    мм
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Максимальная нагрузка:
+                    <TextField
+                      sx={{
+                        ml: 1,
+                        width: "300px",
+                        maxWidth: "400px",
+                        minWidth: "150px",
+                      }}
+                      name="Выходная нагрузка:кг"
+                      className="кг"
+                      id="oValueIntA"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[2].oValueIntA) ||
+                        ""
+                      }
+                      size="small"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      placeholder="Введите нагрузку"
+                    />
+                    кг
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Габариты в заводской упаковке:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Габариты в заводской упаковке:"
+                      id="oValueChar"
+                      onChange={handleChangeOptions}
+                      variant="standard"
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[3].oValueChar) ||
+                        ""
+                      }
+                      placeholder="Введите габариты объекта в упаковке"
+                    />
+                  </Typography>
+                </Box>
+                <Box sx={{ mt: 1.5, ml: 1, fontWeight: "light" }}>
+                  <Typography sx={{ p: 1 }}>
+                    Вес в упаковке:
+                    <TextField
+                      sx={{ ml: 1, width: "300px" }}
+                      size="small"
+                      name="Вес в упаковке:Кг"
+                      id="oValueIntA"
+                      onChange={handleChangeOptions}
+                      defaultValue={
+                        (options !== undefined &&
+                          options !== null &&
+                          options[0].oValueIntA) ||
+                        ""
+                      }
+                      variant="standard"
+                      placeholder="Введите вес объекта с упаковкой"
+                    />
+                  </Typography>
+                </Box>
+              </Stack>
+              <Button sx={{ m: 1 }} onClick={handleSaveOptions}>
+                Сохранить изменения
+              </Button>
+            </>
+          );
+
         default:
           return;
       }

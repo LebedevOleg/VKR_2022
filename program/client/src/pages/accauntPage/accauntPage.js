@@ -98,7 +98,7 @@ const AccauntPage = () => {
   const maps = useRef(null);
   //#endregion
 
-  const [orders, setOrders] = useState(null);
+  const [orders, setOrders] = useState([]);
   const [address, setAddress] = useState();
 
   const handleChangePass = (event) => {
@@ -162,8 +162,11 @@ const AccauntPage = () => {
         if (res.data.message === undefined) {
           setOrders(res.data.orders);
           setAddress(res.data.places);
+          console.log(orders);
         } else {
-          setOrders(res.data.message);
+          toast.error("Вы еще не сделали ни одного заказа", {
+            position: "bottom-left",
+          });
         }
       });
   }, []);
@@ -276,6 +279,7 @@ const AccauntPage = () => {
                   </TableRow>
                 </TableHead>
                 {orders !== null &&
+                  orders.length !== 0 &&
                   orders.map((order) => (
                     <TableBody key={order.id}>
                       <TableCell align="center">{order.id}</TableCell>
