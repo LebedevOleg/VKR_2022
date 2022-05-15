@@ -9,18 +9,32 @@ const auth = require("../middleware/auth.middleware");
 const router = new Router();
 
 // */api/item/getItem
-router.post("/getItem", async (req, res) => {
-  try {
-    const { id } = req.body;
-    const item = await db.query('SELECT * FROM equipment WHERE "id"=$1', [id]);
-    if (item.rowCount === 0) {
-      return res.status(201).json({ message: "Ошибка в получении данных" });
+router.post(
+  "/getItem",
+  [
+    check("id", "Пароль не может быть пустым").exists(),
+    check("id", "Поле id не может быть пустым").trim().isEmpty(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({ message: errors });
+      }
+      const { id } = req.body;
+      const item = await db.query('SELECT * FROM equipment WHERE "id"=$1', [
+        id,
+      ]);
+      if (item.rowCount === 0) {
+        return res.status(201).json({ message: "Ошибка в получении данных" });
+      }
+      res.status(201).json({ item: item.rows[0] });
+    } catch (e) {
+      res.status(400).json({ message: e.message });
     }
-    res.status(201).json({ item: item.rows[0] });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
   }
-});
+);
 
 // */api/item/getItems
 router.get("/getItems", async (req, res) => {
@@ -54,55 +68,77 @@ router.get("/getItems", async (req, res) => {
 });
 
 // */api/item/getFilterItems
-router.post("/getFilterItems", async (req, res) => {
-  try {
-    const { price, category } = req.body;
-    console.log(price, category);
-    let itemsArray;
-    if (category === "all") {
-      itemsArray = await db.query(
-        'SELECT * FROM equipment WHERE "priceForHour" <$2 and "priceForHour" >$1',
-        [price[0], price[1]]
-      );
-    } else {
-      itemsArray = await db.query(
-        'SELECT * FROM equipment WHERE "priceForHour" <$2 and "priceForHour" >$1 and "eCategory" = $3',
-        [price[0], price[1], category]
-      );
-    }
-    console.log(itemsArray);
-    const items = new Map();
-    for (let i = 0; i < itemsArray.rowCount; i++) {
-      if (items.has(itemsArray.rows[i].eName)) {
-        if (
-          items.get(itemsArray.rows[i].eName).eUsed >= itemsArray.rows[i].eUsed
-        ) {
+router.post(
+  "/getFilterItems",
+  [
+    check("price", "Пароль не может быть пустым").exists(),
+    check("category", "Поле id не может быть пустым").exists(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({ message: errors });
+      }
+      const { price, category } = req.body;
+      console.log(price, category);
+      let itemsArray;
+      if (category === "all") {
+        itemsArray = await db.query(
+          'SELECT * FROM equipment WHERE "priceForHour" <$2 and "priceForHour" >$1',
+          [price[0], price[1]]
+        );
+      } else {
+        itemsArray = await db.query(
+          'SELECT * FROM equipment WHERE "priceForHour" <$2 and "priceForHour" >$1 and "eCategory" = $3',
+          [price[0], price[1], category]
+        );
+      }
+      console.log(itemsArray);
+      const items = new Map();
+      for (let i = 0; i < itemsArray.rowCount; i++) {
+        if (items.has(itemsArray.rows[i].eName)) {
+          if (
+            items.get(itemsArray.rows[i].eName).eUsed >=
+            itemsArray.rows[i].eUsed
+          ) {
+            items.set(itemsArray.rows[i].eName, itemsArray.rows[i]);
+          }
+        } else {
           items.set(itemsArray.rows[i].eName, itemsArray.rows[i]);
         }
-      } else {
-        items.set(itemsArray.rows[i].eName, itemsArray.rows[i]);
       }
+      let array = Array.from(items, ([name, value]) => ({ name, value }));
+      res.status(201).json({ items: array });
+    } catch (e) {
+      res.status(400).json({ message: e.message });
     }
-    let array = Array.from(items, ([name, value]) => ({ name, value }));
-    res.status(201).json({ items: array });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
   }
-});
+);
 
 // */api/item/getCategory
-router.post("/getCategory", async (req, res) => {
-  try {
-    const { id } = req.body;
-    const category = await db.query(
-      'SELECT "eCategory" FROM equipment WHERE "id" =$1',
-      [id]
-    );
-    res.status(201).json({ category: category.rows[0].eCategory });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
+router.post(
+  "/getCategory",
+  [check("id", "Пароль не может быть пустым").exists()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({ message: errors });
+      }
+      const { id } = req.body;
+      const category = await db.query(
+        'SELECT "eCategory" FROM equipment WHERE "id" =$1',
+        [id]
+      );
+      res.status(201).json({ category: category.rows[0].eCategory });
+    } catch (e) {
+      res.status(400).json({ message: e.message });
+    }
   }
-});
+);
 
 // */api/item/getAllCategory
 router.get("/getAllCategory", async (req, res) => {
@@ -125,174 +161,220 @@ router.get("/getAllCategory", async (req, res) => {
 });
 
 // */api/item/getOptions
-router.post("/getOptions", async (req, res) => {
-  try {
-    const { id } = req.body;
-    const itemName = await db.query(
-      'SELECT "eName" FROM equipment WHERE id = $1',
-      [id]
-    );
-    const options = await db.query(
-      'SELECT DISTINCT ON ("oName") "oName", options.id,  "oValueIntA", "oValueIntB", "oValueChar",options."eName", "oValueName"  FROM options INNER JOIN equipment USING ("eName") where options."eName" = $1 ORDER BY "oName" DESC',
-      [itemName.rows[0].eName]
-    );
-    if (options.rowCount === 0) {
-      return res.status(201).json({
-        result:
-          "Характеристике объекта еще не внесены, просим прощения за предоставленные неудобства",
-      });
-    }
-    res.status(201).json({ options: options.rows });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
-});
-// */api/item/getOptionsSort
-router.post("/getOptionsSort", async (req, res) => {
-  try {
-    const { id } = req.body;
-    const itemName = await db.query(
-      'SELECT "eName" FROM equipment WHERE id = $1',
-      [id]
-    );
-    const options = await db.query(
-      'SELECT DISTINCT ON ("oName") "oName", options.id,  "oValueIntA", "oValueIntB", "oValueChar",options."eName", "oValueName"  FROM options INNER JOIN equipment USING ("eName") where options."eName" = $1 ORDER BY "oName" ASC',
-      [itemName.rows[0].eName]
-    );
-    if (options.rowCount === 0) {
-      return res.status(201).json({
-        result:
-          "Характеристике объекта еще не внесены, просим прощения за предоставленные неудобства",
-      });
-    }
-    res.status(201).json({ options: options.rows });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
-});
-// */api/item/updateOptions
-router.post("/updateOptions", async (req, res) => {
-  const { options, id } = req.body;
-  const itemName = await db.query(
-    'SELECT "eName", "eCategory" FROM equipment WHERE id = $1',
-    [id]
-  );
-  options.map(async (option) => {
-    //!option[0] - имя option, [1] - параметры
-    const check = await db.query(
-      'SELECT id, "oValueIntA", "oValueIntB" FROM options WHERE "oName" = $1 and "eName" =$2',
-      [option[0], itemName.rows[0].eName]
-    );
-    console.log(check.rowCount, check.rows);
-    if (check.rowCount === 0) {
-      await db.query(
-        'INSERT INTO options( "oName", "oValueChar", "eName", "oValueName", "oValueIntA", "oValueIntB") VALUES ( $1, $2, $3, $4, $5, $6)',
-        [
-          option[1].oName,
-          option[1].oValueChar,
-          itemName.rows[0].eName,
-          option[1].oValueName,
-          Number(option[1].oValueIntA),
-          Number(option[1].oValueIntB),
-        ]
+router.post(
+  "/getOptions",
+  [check("id", "Пароль не может быть пустым").exists()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({ message: errors });
+      }
+      const { id } = req.body;
+      const itemName = await db.query(
+        'SELECT "eName" FROM equipment WHERE id = $1',
+        [id]
       );
-    } else {
-      if (option[1].oValueIntA === null && option[1].oValueIntB === null) {
+      const options = await db.query(
+        'SELECT DISTINCT ON ("oName") "oName", options.id,  "oValueIntA", "oValueIntB", "oValueChar",options."eName", "oValueName"  FROM options INNER JOIN equipment USING ("eName") where options."eName" = $1 ORDER BY "oName" DESC',
+        [itemName.rows[0].eName]
+      );
+      if (options.rowCount === 0) {
+        return res.status(201).json({
+          result:
+            "Характеристике объекта еще не внесены, просим прощения за предоставленные неудобства",
+        });
+      }
+      res.status(201).json({ options: options.rows });
+    } catch (e) {
+      res.status(400).json({ message: e.message });
+    }
+  }
+);
+// */api/item/getOptionsSort
+router.post(
+  "/getOptionsSort",
+  [check("id", "Пароль не может быть пустым").exists()],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({ message: errors });
+      }
+      const { id } = req.body;
+      const itemName = await db.query(
+        'SELECT "eName" FROM equipment WHERE id = $1',
+        [id]
+      );
+      const options = await db.query(
+        'SELECT DISTINCT ON ("oName") "oName", options.id,  "oValueIntA", "oValueIntB", "oValueChar",options."eName", "oValueName"  FROM options INNER JOIN equipment USING ("eName") where options."eName" = $1 ORDER BY "oName" ASC',
+        [itemName.rows[0].eName]
+      );
+      if (options.rowCount === 0) {
+        return res.status(201).json({
+          result:
+            "Характеристике объекта еще не внесены, просим прощения за предоставленные неудобства",
+        });
+      }
+      res.status(201).json({ options: options.rows });
+    } catch (e) {
+      res.status(400).json({ message: e.message });
+    }
+  }
+);
+// */api/item/updateOptions
+router.post(
+  "/updateOptions",
+  [
+    check("options", "Вы не обновили ни один параметр").exists(),
+    check("id", "Поле email не может быть пустым").exists(),
+  ],
+  async (req, res) => {
+    const { options, id } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log(errors);
+      return res.status(400).json({ message: errors });
+    }
+    const itemName = await db.query(
+      'SELECT "eName", "eCategory" FROM equipment WHERE id = $1',
+      [id]
+    );
+    options.map(async (option) => {
+      //!option[0] - имя option, [1] - параметры
+      const check = await db.query(
+        'SELECT id, "oValueIntA", "oValueIntB" FROM options WHERE "oName" = $1 and "eName" =$2',
+        [option[0], itemName.rows[0].eName]
+      );
+      console.log(check.rowCount, check.rows);
+      if (check.rowCount === 0) {
         await db.query(
-          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
-          [
-            option[1].oName,
-            option[1].oValueChar,
-            itemName.rows[0].eName,
-            option[1].oValueName,
-            Number(check.rows[0].oValueIntA),
-            Number(check.rows[0].oValueIntB),
-          ]
-        );
-      } else if (
-        option[1].oValueIntA === null &&
-        option[1].oValueIntB !== null
-      ) {
-        await db.query(
-          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
-          [
-            option[1].oName,
-            option[1].oValueChar,
-            itemName.rows[0].eName,
-            option[1].oValueName,
-            Number(check.rows[0].oValueIntA),
-            Number(option[1].oValueIntB),
-          ]
-        );
-      } else if (
-        option[1].oValueIntA !== null &&
-        option[1].oValueIntB === null
-      ) {
-        await db.query(
-          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
+          'INSERT INTO options( "oName", "oValueChar", "eName", "oValueName", "oValueIntA", "oValueIntB") VALUES ( $1, $2, $3, $4, $5, $6)',
           [
             option[1].oName,
             option[1].oValueChar,
             itemName.rows[0].eName,
             option[1].oValueName,
             Number(option[1].oValueIntA),
-            Number(check.rows[0].oValueIntB),
+            Number(option[1].oValueIntB),
           ]
         );
       } else {
+        if (option[1].oValueIntA === null && option[1].oValueIntB === null) {
+          await db.query(
+            'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
+            [
+              option[1].oName,
+              option[1].oValueChar,
+              itemName.rows[0].eName,
+              option[1].oValueName,
+              Number(check.rows[0].oValueIntA),
+              Number(check.rows[0].oValueIntB),
+            ]
+          );
+        } else if (
+          option[1].oValueIntA === null &&
+          option[1].oValueIntB !== null
+        ) {
+          await db.query(
+            'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
+            [
+              option[1].oName,
+              option[1].oValueChar,
+              itemName.rows[0].eName,
+              option[1].oValueName,
+              Number(check.rows[0].oValueIntA),
+              Number(option[1].oValueIntB),
+            ]
+          );
+        } else if (
+          option[1].oValueIntA !== null &&
+          option[1].oValueIntB === null
+        ) {
+          await db.query(
+            'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
+            [
+              option[1].oName,
+              option[1].oValueChar,
+              itemName.rows[0].eName,
+              option[1].oValueName,
+              Number(option[1].oValueIntA),
+              Number(check.rows[0].oValueIntB),
+            ]
+          );
+        } else {
+          await db.query(
+            'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
+            [
+              option[1].oName,
+              option[1].oValueChar,
+              itemName.rows[0].eName,
+              option[1].oValueName,
+              Number(option[1].oValueIntA),
+              Number(option[1].oValueIntB),
+            ]
+          );
+        }
+      }
+    });
+    res.status(201);
+  }
+);
+
+// */api/item/addItem
+router.post(
+  "/addItem",
+  [
+    check("name", "Пароль не может быть пустым").exists(),
+    check("price", "Цена не может быть пустым").exists(),
+    check("description", "Описание не может быть пустым").exists(),
+    check("priceForHour", "Арендная цена не может быть пустым").exists(),
+    check("number", "Колличество не может быть пустым").exists(),
+    check("options", "Опции не могут быть пустыми").exists(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({ message: errors });
+      }
+      const {
+        category,
+        name,
+        price,
+        description,
+        priceForHour,
+        number,
+        options,
+      } = req.body;
+      for (let i = 0; i < number; i++) {
         await db.query(
-          'UPDATE options SET "oName"=$1, "oValueChar"=$2, "eName"=$3, "oValueName"=$4, "oValueIntA"=$5, "oValueIntB"=$6 WHERE "oName"=$1 and "eName"=$3',
+          'INSERT INTO equipment( "eName", "ePrice", "eDescription", "eCategory", "priceForHour")	VALUES ( $1, $2, $3, $4, $5)',
+          [category + " " + name, price, description, category, priceForHour]
+        );
+      }
+      options.map(async (option) => {
+        await db.query(
+          'INSERT INTO options( "oName", "oValueChar", "eName", "oValueName", "oValueIntA", "oValueIntB") VALUES ( $1, $2, $3, $4, $5, $6)',
           [
             option[1].oName,
             option[1].oValueChar,
-            itemName.rows[0].eName,
+            category + " " + name,
             option[1].oValueName,
             Number(option[1].oValueIntA),
             Number(option[1].oValueIntB),
           ]
         );
-      }
+      });
+      res.status(201).json({ status: "OK" });
+    } catch (e) {
+      res.status(400).json({ message: e.message });
     }
-  });
-  res.status(201);
-});
-
-// */api/item/addItem
-router.post("/addItem", async (req, res) => {
-  try {
-    const {
-      category,
-      name,
-      price,
-      description,
-      priceForHour,
-      number,
-      options,
-    } = req.body;
-    for (let i = 0; i < number; i++) {
-      await db.query(
-        'INSERT INTO equipment( "eName", "ePrice", "eDescription", "eCategory", "priceForHour")	VALUES ( $1, $2, $3, $4, $5)',
-        [category + " " + name, price, description, category, priceForHour]
-      );
-    }
-    options.map(async (option) => {
-      await db.query(
-        'INSERT INTO options( "oName", "oValueChar", "eName", "oValueName", "oValueIntA", "oValueIntB") VALUES ( $1, $2, $3, $4, $5, $6)',
-        [
-          option[1].oName,
-          option[1].oValueChar,
-          category + " " + name,
-          option[1].oValueName,
-          Number(option[1].oValueIntA),
-          Number(option[1].oValueIntB),
-        ]
-      );
-    });
-    res.status(201).json({ status: "OK" });
-  } catch (e) {
-    res.status(400).json({ message: e.message });
   }
-});
+);
 
 // */api/item/getImage
 router.post("/getImage", async (req, res) => {

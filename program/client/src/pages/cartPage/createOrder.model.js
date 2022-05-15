@@ -22,6 +22,7 @@ import { setHours, setMinutes } from "date-fns";
 import React, { useState, useContext } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import toast from "react-hot-toast";
 import { AuthContext } from "../../context/authContext";
 import SignInOrSignUp from "./signInOrSignUp";
 
@@ -78,22 +79,32 @@ export function CreateOrderModal(data) {
     });
   }; */
   const handleSaveOrder = async () => {
-    await axios.post(
-      "/api/cart/saveOrder",
-      {
-        startDate,
-        endDate,
-        addres,
-        priceAll: price,
-        priceComplite: (price / 100) * 15,
-        items: data.items,
-      },
-      {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      }
-    );
-    localStorage.removeItem("cart");
-    window.location = "/profile";
+    await axios
+      .post(
+        "/api/cart/saveOrder",
+        {
+          startDate,
+          endDate,
+          addres,
+          priceAll: price,
+          priceComplite: (price / 100) * 15,
+          items: data.items,
+        },
+        {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        }
+      )
+      .then((res) => {
+        localStorage.removeItem("cart");
+        window.location = "/profile";
+      })
+      .catch((error) => {
+        if (error.request) {
+          toast.error(error.response.data.message, {
+            position: "bottom-left",
+          });
+        }
+      });
   };
 
   const handlerChangeAddress = (event) => {

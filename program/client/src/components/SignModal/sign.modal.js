@@ -55,9 +55,19 @@ const SignModal = () => {
 
   const regFunc = async () => {
     try {
-      const registrData = await axios.post("/api/sign/registr", { ...formReg });
-      auth.login(registrData.data.token, registrData.data.userId);
-      window.location = "/accountReg";
+      const registrData = await axios
+        .post("/api/sign/registr", { ...formReg })
+        .then((res) => {
+          auth.login(registrData.data.token, registrData.data.userId);
+          window.location = "/accountReg";
+        })
+        .catch((error) => {
+          if (error.request) {
+            toast.error(error.response.data.message, {
+              position: "bottom-left",
+            });
+          }
+        });
     } catch (e) {
       console.log(e);
     }

@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import React, { useCallback, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
 
@@ -78,10 +79,18 @@ const AddOptions = () => {
 
   const handleSaveOptions = async () => {
     console.log(optionsMap);
-    await axios.post("/api/item/updateOptions", {
-      options: [...optionsMap],
-      id: Number(params.id.split(":")[1]),
-    });
+    await axios
+      .post("/api/item/updateOptions", {
+        options: [...optionsMap],
+        id: Number(params.id.split(":")[1]),
+      })
+      .catch((error) => {
+        if (error.request) {
+          toast.error(error.response.data.message, {
+            position: "bottom-left",
+          });
+        }
+      });
   };
 
   useEffect(() => {

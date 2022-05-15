@@ -7,28 +7,21 @@ const bcrypt = require("bcryptjs");
 
 const router = new Router();
 
-// */api/sign
-router.post("/", async (req, res) => {
-  try {
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
-});
-
-// */api/sign
-router.get("/", async (req, res) => {
-  try {
-  } catch (e) {
-    res.status(400).json({ message: e.message });
-  }
-});
-
 // */api/sign/login
 router.post(
   "/login",
-  [check("password", "Пароль не может быть пустым").exists()],
+  [
+    check("password", "Пароль не может быть пустым").exists(),
+    check("email", "Поле email не может быть пустым").trim().isEmpty(),
+    check("email", "Поле email не является почтой").trim().isEmail(),
+  ],
   async (req, res) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(400).json({ message: errors });
+      }
       const { email, password } = req.body;
       const user = await db.query('SELECT * FROM users WHERE "uEmail" = $1', [
         email,
@@ -57,7 +50,13 @@ router.post(
 // */api/sign/registr
 router.post(
   "/registr",
-  [check("password", "Минимальная длинна 4").trim().isLength({ min: 4 })],
+  [
+    check("password", "Минимальная длинна 4").trim().isLength({ min: 4 }),
+    check("email", "Поле email не может быть пустым").trim().isEmpty(),
+    check("email", "Поле email не является почтой").trim().isEmail(),
+    check("firstName", "Поле 'Имя' не может быть пустым").trim().isEmpty(),
+    check("lastName", "Поле 'Фамилия' не может быть пустым").trim().isEmpty(),
+  ],
   async (req, res) => {
     try {
       const errors = validationResult(req);

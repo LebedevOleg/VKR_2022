@@ -21,10 +21,12 @@ import Paper from "@mui/material/Paper";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import AddOptions from "./addOptions";
+import toast, { Toaster } from "react-hot-toast";
 
 const ItemPage = () => {
   const [item, setItem] = useState(null);
   const [options, setOptions] = useState(null);
+  const [disable, setDisable] = useState(false);
   const params = useParams();
   const [images, setImage] = useState([null]);
   const [visImage, setVisImage] = useState("");
@@ -55,6 +57,51 @@ const ItemPage = () => {
         setOptions(res.data.options);
       });
   }, []);
+
+  const handleSaveItem = async () => {
+    const cartArray = [];
+    if (localStorage.getItem("cart")) {
+      cartArray.push(localStorage.getItem("cart"));
+      if (
+        cartArray[0]
+          .split(",")
+          .includes(Number(params.id.split(":")[1].toString()))
+      ) {
+        let tempArr = [];
+        tempArr = cartArray[0].split(",");
+        tempArr.push(Number(params.id.split(":")[1].toString()));
+        await axios
+          .post("/api/item/findFreeItem", { ids: tempArr })
+          .then((res) => {
+            if (res.data.nextID !== 0) {
+              cartArray.push(res.data.nextID[0][1]);
+              localStorage.setItem("cart", cartArray);
+              toast.success("Товар добавлен в карзину", {
+                position: "bottom-left",
+              });
+            } else {
+              setDisable(true);
+              toast.error("Данный товар закончился!", {
+                position: "bottom-left",
+              });
+            }
+          });
+      } else {
+        cartArray.push(Number(params.id.split(":")[1]));
+        localStorage.setItem("cart", cartArray);
+        toast.success("Товар добавлен в карзину", {
+          position: "bottom-left",
+        });
+      }
+    } else {
+      cartArray.push(Number(params.id.split(":")[1]));
+      localStorage.setItem("cart", cartArray);
+      toast.success("Товар добавлен в карзину", {
+        position: "bottom-left",
+      });
+    }
+  };
+
   useEffect(() => {
     handleGetImage();
     handleGetItem();
@@ -73,6 +120,9 @@ const ItemPage = () => {
   }
   return (
     <Box>
+      <div>
+        <Toaster />
+      </div>
       <Card sx={{ display: "flex" }}>
         <CardMedia>
           {visImage !== "" && images[0] !== null && (
@@ -137,7 +187,9 @@ const ItemPage = () => {
           </Box>
         </CardContent>
         <CardActions sx={{ alignItems: "end" }}>
-          <Button>В корзину</Button>
+          <Button disabled={disable} onClick={handleSaveItem}>
+            В корзину
+          </Button>
         </CardActions>
       </Card>
       <Box>
