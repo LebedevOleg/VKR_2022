@@ -86,7 +86,7 @@ const AddOptions = () => {
       })
       .catch((error) => {
         if (error.request) {
-          toast.error(error.response.data.message, {
+          toast.error(error.response.data.message.errors[0].msg, {
             position: "bottom-left",
           });
         }
