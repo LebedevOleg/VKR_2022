@@ -13,7 +13,7 @@ router.post(
   "/getItem",
   [
     check("id", "Пароль не может быть пустым").exists(),
-    check("id", "Поле id не может быть пустым").trim().isEmpty(),
+    check("id", "Поле id не может быть пустым").notEmpty(),
   ],
   async (req, res) => {
     try {

@@ -12,7 +12,7 @@ router.post(
   "/login",
   [
     check("password", "Пароль не может быть пустым").exists(),
-    check("email", "Поле email не может быть пустым").trim().isEmpty(),
+    check("email", "Поле email не может быть пустым").trim().notEmpty(),
     check("email", "Поле email не является почтой").trim().isEmail(),
   ],
   async (req, res) => {
@@ -52,10 +52,10 @@ router.post(
   "/registr",
   [
     check("password", "Минимальная длинна 4").trim().isLength({ min: 4 }),
-    check("email", "Поле email не может быть пустым").trim().isEmpty(),
-    check("email", "Поле email не является почтой").trim().isEmail(),
-    check("firstName", "Поле 'Имя' не может быть пустым").trim().isEmpty(),
-    check("lastName", "Поле 'Фамилия' не может быть пустым").trim().isEmpty(),
+    check("email", "Поле email не может быть пустым").trim().notEmpty(),
+    check("email", "Поле email не является почтой").trim().notEmpty(),
+    check("firstName", "Поле 'Имя' не может быть пустым").trim().notEmpty(),
+    check("lastName", "Поле 'Фамилия' не может быть пустым").trim().notEmpty(),
   ],
   async (req, res) => {
     try {
