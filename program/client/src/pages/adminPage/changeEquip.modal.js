@@ -182,6 +182,7 @@ const ChangeEquipModal = (data) => {
                 color="error"
                 sx={{
                   mt: 1,
+                  
                   mr: 2,
                   maxWidth: 450,
                   display: "flex",
