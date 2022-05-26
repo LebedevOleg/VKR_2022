@@ -167,7 +167,7 @@ const ShopPage = () => {
           sx={{ display: "flex", flexWrap: "wrap" }}
         >
           {itemArray.map((item) => (
-            <Grid item xs={2} sm={4} md={4} key={item.id}>
+            <Grid item xs={3} sm={6} md={4} key={item.id}>
               <ItemCard item={item.value} />
             </Grid>
           ))}
